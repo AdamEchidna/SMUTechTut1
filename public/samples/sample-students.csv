@@ -1,0 +1,6 @@
+firstName,lastName,email,studentNumber,year,password
+Alice,Tan,alice.tan@smu.edu.sg,A1001,2,Password1
+Bob,Lim,bob.lim@smu.edu.sg,A1002,3,Password2
+Charlie,Wong,charlie.wong@smu.edu.sg,A1003,1,Password3
+Diana,Chen,diana.chen@smu.edu.sg,A1004,4,Password4
+Ethan,Goh,ethan.goh@smu.edu.sg,A1005,2,Password5

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Members - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="sidebar-logo-img">
+        <p>Peer Evaluation System</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/evaluation.html">
+          <span class="icon">&#9998;</span>
+          <span>Peer Evaluations</span>
+        </a>
+        <a href="/team-members.html" class="active">
+          <span class="icon">&#128101;</span>
+          <span>Team Members</span>
+        </a>
+        <a href="/feedback.html">
+          <span class="icon">&#128172;</span>
+          <span>Your Feedback</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">S</div>
+          <div>
+            <div class="user-name" id="userName">Student</div>
+            <div class="user-role">Student</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Team Members</h1>
+        <p>View the students assigned to your courses and groups.</p>
+      </div>
+
+      <div class="content-card">
+        <div id="teamContainer">
+          <p class="muted">Loading team members...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        const user = await res.json();
+        document.getElementById('userName').textContent = user.name || 'Student';
+        document.getElementById('userAvatar').textContent = (user.name || 'S').charAt(0).toUpperCase();
+        loadTeamMembers();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadTeamMembers() {
+      const container = document.getElementById('teamContainer');
+      try {
+        const res = await fetch('/api/my-team-members');
+        const members = await res.json();
+
+        if (members.length === 0) {
+          container.innerHTML = '<p class="muted">You are not currently assigned to any teams. Once a professor enrolls you in a course, your team members will appear here.</p>';
+          return;
+        }
+
+        // Group members by course
+        const byCourse = {};
+        members.forEach(m => {
+          const key = m.courseNumber + ' - ' + m.courseName;
+          if (!byCourse[key]) byCourse[key] = { groupName: m.groupName, members: [] };
+          byCourse[key].members.push(m);
+        });
+
+        let html = '';
+        for (const [course, data] of Object.entries(byCourse)) {
+          html += `<div class="team-course-section">
+            <h3>${course}${data.groupName ? ' <span class="group-badge">' + data.groupName + '</span>' : ''}</h3>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.members.map(m => `
+                  <tr>
+                    <td>${m.firstName} ${m.lastName}</td>
+                    <td>${m.email}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>`;
+        }
+        container.innerHTML = html;
+      } catch {
+        container.innerHTML = '<p class="muted">Error loading team members.</p>';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

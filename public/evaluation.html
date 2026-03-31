@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peer Evaluation - SMU</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="sidebar-logo-img">
+        <p>Peer Evaluation System</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/evaluation.html" class="active">
+          <span class="icon">&#9998;</span>
+          <span>Peer Evaluations</span>
+        </a>
+        <a href="/team-members.html">
+          <span class="icon">&#128101;</span>
+          <span>Team Members</span>
+        </a>
+        <a href="/feedback.html">
+          <span class="icon">&#128172;</span>
+          <span>Your Feedback</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">S</div>
+          <div>
+            <div class="user-name" id="userName">Student</div>
+            <div class="user-role">Student</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Peer Evaluation Form</h1>
+      </div>
+
+      <!-- Course & Assignment Selection -->
+      <div class="content-card">
+        <div class="eval-top-row">
+          <div class="eval-field">
+            <label for="courseSelect"><strong>Course:</strong></label>
+            <select id="courseSelect">
+              <option value="">Select Course</option>
+            </select>
+          </div>
+          <div class="eval-field">
+            <label><strong>Due Date:</strong></label>
+            <span id="dueDate" class="due-date-display">--</span>
+          </div>
+        </div>
+
+        <!-- Assignment (hidden select, auto-picks active) -->
+        <input type="hidden" id="assignmentID" value="">
+        <input type="hidden" id="groupID" value="">
+
+        <!-- Team Member Selection -->
+        <div class="eval-field" style="margin-top: 20px;">
+          <label for="teamMemberSelect"><strong>Team Member:</strong></label>
+          <select id="teamMemberSelect" disabled>
+            <option value="">Select a team member</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Rating Form -->
+      <div class="content-card" id="ratingSection" style="display:none;">
+        <form id="evalForm">
+          <div class="rating-criteria">
+            <div class="rating-row">
+              <div class="rating-label">Contributes to Team</div>
+              <div class="rating-scale">
+                <span class="scale-label">Poor</span>
+                <label><input type="radio" name="contributesToTeam" value="1" required> 1</label>
+                <label><input type="radio" name="contributesToTeam" value="2"> 2</label>
+                <label><input type="radio" name="contributesToTeam" value="3"> 3</label>
+                <label><input type="radio" name="contributesToTeam" value="4"> 4</label>
+                <label><input type="radio" name="contributesToTeam" value="5"> 5</label>
+                <span class="scale-label">Excellent</span>
+              </div>
+            </div>
+
+            <div class="rating-row">
+              <div class="rating-label">Facilitates Contribution</div>
+              <div class="rating-scale">
+                <span class="scale-label">Poor</span>
+                <label><input type="radio" name="facilitatesContribution" value="1" required> 1</label>
+                <label><input type="radio" name="facilitatesContribution" value="2"> 2</label>
+                <label><input type="radio" name="facilitatesContribution" value="3"> 3</label>
+                <label><input type="radio" name="facilitatesContribution" value="4"> 4</label>
+                <label><input type="radio" name="facilitatesContribution" value="5"> 5</label>
+                <span class="scale-label">Excellent</span>
+              </div>
+            </div>
+
+            <div class="rating-row">
+              <div class="rating-label">Planning & Management</div>
+              <div class="rating-scale">
+                <span class="scale-label">Poor</span>
+                <label><input type="radio" name="planningAndManaging" value="1" required> 1</label>
+                <label><input type="radio" name="planningAndManaging" value="2"> 2</label>
+                <label><input type="radio" name="planningAndManaging" value="3"> 3</label>
+                <label><input type="radio" name="planningAndManaging" value="4"> 4</label>
+                <label><input type="radio" name="planningAndManaging" value="5"> 5</label>
+                <span class="scale-label">Excellent</span>
+              </div>
+            </div>
+
+            <div class="rating-row">
+              <div class="rating-label">Fosters Team Environment</div>
+              <div class="rating-scale">
+                <span class="scale-label">Poor</span>
+                <label><input type="radio" name="fostersTeamEnvironment" value="1" required> 1</label>
+                <label><input type="radio" name="fostersTeamEnvironment" value="2"> 2</label>
+                <label><input type="radio" name="fostersTeamEnvironment" value="3"> 3</label>
+                <label><input type="radio" name="fostersTeamEnvironment" value="4"> 4</label>
+                <label><input type="radio" name="fostersTeamEnvironment" value="5"> 5</label>
+                <span class="scale-label">Excellent</span>
+              </div>
+            </div>
+
+            <div class="rating-row">
+              <div class="rating-label">Manages Conflict</div>
+              <div class="rating-scale">
+                <span class="scale-label">Poor</span>
+                <label><input type="radio" name="managesConflict" value="1" required> 1</label>
+                <label><input type="radio" name="managesConflict" value="2"> 2</label>
+                <label><input type="radio" name="managesConflict" value="3"> 3</label>
+                <label><input type="radio" name="managesConflict" value="4"> 4</label>
+                <label><input type="radio" name="managesConflict" value="5"> 5</label>
+                <span class="scale-label">Excellent</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments -->
+          <div class="form-group" style="margin-top: 24px;">
+            <label for="comments"><strong>Comments:</strong></label>
+            <textarea id="comments" name="comments" rows="4" placeholder="Optional comments about this team member..."></textarea>
+          </div>
+
+          <div class="eval-actions">
+            <span class="required-note">* Required</span>
+            <div>
+              <button type="reset" class="btn-secondary">Reset Form</button>
+              <button type="submit" class="btn-primary btn-submit">Submit Evaluation</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="successMsg" class="success-message" style="display:none;">
+        Evaluation submitted successfully!
+      </div>
+    </main>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="reviewModal" class="review-modal-overlay" style="display:none;">
+    <div class="review-modal">
+      <div class="review-modal-header">
+        <h2>Review Your Evaluation</h2>
+        <p>Please review the details below before submitting.</p>
+      </div>
+      <div class="review-modal-body">
+        <div class="review-row">
+          <span class="review-label">Course:</span>
+          <span id="reviewCourse" class="review-value"></span>
+        </div>
+        <div class="review-row">
+          <span class="review-label">Team Member:</span>
+          <span id="reviewMember" class="review-value"></span>
+        </div>
+        <hr class="review-divider">
+        <div class="review-ratings">
+          <div class="review-row">
+            <span class="review-label">Contributes to Team:</span>
+            <span id="reviewR1" class="review-value review-score"></span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Facilitates Contribution:</span>
+            <span id="reviewR2" class="review-value review-score"></span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Planning &amp; Management:</span>
+            <span id="reviewR3" class="review-value review-score"></span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Fosters Team Environment:</span>
+            <span id="reviewR4" class="review-value review-score"></span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Manages Conflict:</span>
+            <span id="reviewR5" class="review-value review-score"></span>
+          </div>
+          <div class="review-row review-total">
+            <span class="review-label">Overall Score:</span>
+            <span id="reviewTotal" class="review-value review-score"></span>
+          </div>
+        </div>
+        <div id="reviewCommentsSection" class="review-comments">
+          <span class="review-label">Comments:</span>
+          <p id="reviewComments" class="review-comments-text"></p>
+        </div>
+      </div>
+      <div class="review-modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeReviewModal()">Go Back &amp; Edit</button>
+        <button type="button" class="btn-primary btn-submit" onclick="confirmSubmit()">Confirm &amp; Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Student';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'S').charAt(0).toUpperCase();
+        loadCourses();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadCourses() {
+      const res = await fetch('/api/my-courses');
+      const courses = await res.json();
+      const sel = document.getElementById('courseSelect');
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.courseID;
+        opt.textContent = c.courseNumber + ' - ' + c.courseName;
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('courseSelect').addEventListener('change', async function() {
+      const courseID = this.value;
+      const teamSel = document.getElementById('teamMemberSelect');
+      const ratingSection = document.getElementById('ratingSection');
+
+      teamSel.innerHTML = '<option value="">Select a team member</option>';
+      teamSel.disabled = true;
+      ratingSection.style.display = 'none';
+      document.getElementById('dueDate').textContent = '--';
+      document.getElementById('assignmentID').value = '';
+
+      if (!courseID) return;
+
+      // Load assignments to get due date
+      const assignRes = await fetch('/api/courses/' + courseID + '/assignments');
+      const assignments = await assignRes.json();
+      if (assignments.length > 0) {
+        const a = assignments[0];
+        document.getElementById('assignmentID').value = a.assignmentID;
+        document.getElementById('dueDate').textContent = new Date(a.closeDate).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric'
+        });
+      }
+
+      // Load team members
+      const res = await fetch('/api/courses/' + courseID + '/team-members');
+      const members = await res.json();
+      members.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.studentID;
+        opt.textContent = m.firstName + ' ' + m.lastName;
+        teamSel.appendChild(opt);
+      });
+      teamSel.disabled = false;
+    });
+
+    document.getElementById('teamMemberSelect').addEventListener('change', function() {
+      document.getElementById('ratingSection').style.display = this.value ? 'block' : 'none';
+    });
+
+    let pendingData = null;
+
+    document.getElementById('evalForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      pendingData = {
+        assignmentID: document.getElementById('assignmentID').value,
+        evaluatedID: document.getElementById('teamMemberSelect').value,
+        groupID: document.getElementById('groupID').value || null,
+        contributesToTeam: form.contributesToTeam.value,
+        facilitatesContribution: form.facilitatesContribution.value,
+        planningAndManaging: form.planningAndManaging.value,
+        fostersTeamEnvironment: form.fostersTeamEnvironment.value,
+        managesConflict: form.managesConflict.value,
+        comments: document.getElementById('comments').value
+      };
+
+      // Populate the review modal
+      const courseSel = document.getElementById('courseSelect');
+      document.getElementById('reviewCourse').textContent = courseSel.options[courseSel.selectedIndex].text;
+      const memberSel = document.getElementById('teamMemberSelect');
+      document.getElementById('reviewMember').textContent = memberSel.options[memberSel.selectedIndex].text;
+
+      document.getElementById('reviewR1').textContent = pendingData.contributesToTeam + ' / 5';
+      document.getElementById('reviewR2').textContent = pendingData.facilitatesContribution + ' / 5';
+      document.getElementById('reviewR3').textContent = pendingData.planningAndManaging + ' / 5';
+      document.getElementById('reviewR4').textContent = pendingData.fostersTeamEnvironment + ' / 5';
+      document.getElementById('reviewR5').textContent = pendingData.managesConflict + ' / 5';
+
+      const total = Number(pendingData.contributesToTeam) + Number(pendingData.facilitatesContribution) +
+                    Number(pendingData.planningAndManaging) + Number(pendingData.fostersTeamEnvironment) +
+                    Number(pendingData.managesConflict);
+      document.getElementById('reviewTotal').textContent = total + ' / 25';
+
+      const commentsSection = document.getElementById('reviewCommentsSection');
+      if (pendingData.comments && pendingData.comments.trim()) {
+        document.getElementById('reviewComments').textContent = pendingData.comments;
+        commentsSection.style.display = 'block';
+      } else {
+        commentsSection.style.display = 'none';
+      }
+
+      document.getElementById('reviewModal').style.display = 'flex';
+    });
+
+    function closeReviewModal() {
+      document.getElementById('reviewModal').style.display = 'none';
+    }
+
+    async function confirmSubmit() {
+      if (!pendingData) return;
+
+      const confirmBtn = document.querySelector('#reviewModal .btn-primary');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch('/api/evaluations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pendingData)
+        });
+
+        if (res.ok) {
+          document.getElementById('reviewModal').style.display = 'none';
+          document.getElementById('successMsg').style.display = 'block';
+          document.getElementById('evalForm').reset();
+          document.getElementById('ratingSection').style.display = 'none';
+          setTimeout(() => { document.getElementById('successMsg').style.display = 'none'; }, 4000);
+        } else {
+          const err = await res.json();
+          alert(err.message || 'Error submitting evaluation');
+        }
+      } catch {
+        alert('Unable to connect to server');
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm & Submit';
+        pendingData = null;
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card signup-card">
+      <div class="logo">SMU</div>
+      <h1>Create Account</h1>
+      <p class="subtitle">Join the SMU Peer Evaluation System</p>
+
+      <div id="errorMsg" class="error-message"></div>
+      <div id="successMsg" class="success-message" style="display:none;"></div>
+
+      <!-- Role Toggle -->
+      <div class="role-toggle">
+        <button type="button" class="role-btn active" data-role="student" onclick="setRole('student')">Student</button>
+        <button type="button" class="role-btn" data-role="professor" onclick="setRole('professor')">Professor</button>
+      </div>
+
+      <form id="signupForm">
+        <div class="form-row-signup">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="First name" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Last name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="yourname@smu.edu.sg" required>
+        </div>
+
+        <!-- Student-specific fields -->
+        <div id="studentFields">
+          <div class="form-row-signup">
+            <div class="form-group">
+              <label for="studentNumber">Student Number</label>
+              <input type="number" id="studentNumber" placeholder="e.g. 12345678">
+            </div>
+            <div class="form-group">
+              <label for="year">Year</label>
+              <select id="year">
+                <option value="1">Year 1</option>
+                <option value="2">Year 2</option>
+                <option value="3">Year 3</option>
+                <option value="4">Year 4</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Professor-specific fields -->
+        <div id="professorFields" style="display:none;">
+          <div class="form-group">
+            <label for="professorNumber">Professor Number</label>
+            <input type="text" id="professorNumber" placeholder="e.g. P001">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Create a password" required minlength="8">
+          <p class="password-hint">Min 8 characters, with at least one uppercase, one lowercase, and one number.</p>
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm your password" required minlength="8">
+        </div>
+
+        <button type="submit" class="btn-primary">Create Account</button>
+      </form>
+
+      <div class="login-footer">
+        <p>Already have an account? <a href="/login.html">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer login-page-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let selectedRole = 'student';
+
+    function setRole(role) {
+      selectedRole = role;
+      document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.role-btn[data-role="${role}"]`).classList.add('active');
+      document.getElementById('studentFields').style.display = role === 'student' ? 'block' : 'none';
+      document.getElementById('professorFields').style.display = role === 'professor' ? 'block' : 'none';
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const errorMsg = document.getElementById('errorMsg');
+      const successMsg = document.getElementById('successMsg');
+      errorMsg.classList.remove('show');
+      successMsg.style.display = 'none';
+
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match';
+        errorMsg.classList.add('show');
+        return;
+      }
+
+      const data = {
+        role: selectedRole,
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        password: password
+      };
+
+      if (selectedRole === 'student') {
+        data.studentNumber = document.getElementById('studentNumber').value || null;
+        data.year = document.getElementById('year').value;
+      } else {
+        data.professorNumber = document.getElementById('professorNumber').value || null;
+      }
+
+      try {
+        const res = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          successMsg.textContent = 'Account created successfully! Redirecting to login...';
+          successMsg.style.display = 'block';
+          setTimeout(() => { window.location.href = '/login.html'; }, 2000);
+        } else {
+          errorMsg.textContent = result.message || 'Error creating account';
+          errorMsg.classList.add('show');
+        }
+      } catch {
+        errorMsg.textContent = 'Unable to connect to server';
+        errorMsg.classList.add('show');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professor Dashboard - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="sidebar-logo-img">
+        <p>Professor Dashboard</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="active">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div>
+            <div class="user-name" id="userName">Professor</div>
+            <div class="user-role">Professor</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Manage your courses and student enrollments.</p>
+      </div>
+
+      <!-- Create Course -->
+      <div class="content-card">
+        <h2>Create New Course</h2>
+        <form id="createCourseForm" class="inline-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="courseName">Course Name</label>
+              <input type="text" id="courseName" placeholder="e.g. Software Engineering" required>
+            </div>
+            <div class="form-group">
+              <label for="courseNumber">Course Number</label>
+              <input type="text" id="courseNumber" placeholder="e.g. IS480" required>
+            </div>
+            <div class="form-group">
+              <label for="semester">Semester</label>
+              <input type="text" id="semester" placeholder="e.g. Fall" required>
+            </div>
+            <div class="form-group">
+              <label for="year">Year</label>
+              <input type="number" id="year" placeholder="2026" required>
+            </div>
+            <div class="form-group" style="align-self: flex-end;">
+              <button type="submit" class="btn-primary btn-sm">Create Course</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- My Courses -->
+      <div class="content-card">
+        <h2>My Courses</h2>
+        <div id="coursesList" class="courses-list">
+          <p class="muted">Loading courses...</p>
+        </div>
+      </div>
+
+      <!-- Enrollment Section (shown when a course is selected) -->
+      <div class="content-card" id="enrollmentSection" style="display:none;">
+        <h2>Enroll Students in: <span id="enrollCourseName"></span></h2>
+
+        <div class="enroll-form">
+          <div class="form-group">
+            <label for="studentSelect">Select Student</label>
+            <select id="studentSelect">
+              <option value="">-- Choose a student --</option>
+            </select>
+          </div>
+          <button class="btn-primary btn-sm" onclick="enrollStudent()">Enroll Student</button>
+        </div>
+
+        <h3 style="margin-top: 24px; color: #003D7C;">Enrolled Students</h3>
+        <table class="data-table" id="enrollmentTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Student #</th>
+              <th>Enrolled</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="enrollmentBody">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Batch CSV Import -->
+      <div class="content-card">
+        <h2>Batch Import (CSV)</h2>
+        <p class="batch-subtitle">Upload a CSV file to bulk-import students, courses, or enrollments.</p>
+
+        <div class="batch-import-row">
+          <div class="form-group">
+            <label for="importType">Import Type</label>
+            <select id="importType" onchange="updateTemplateHint()">
+              <option value="students">Students</option>
+              <option value="courses">Courses</option>
+              <option value="enrollments">Enrollments</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="csvFile">CSV File</label>
+            <input type="file" id="csvFile" accept=".csv" class="file-input">
+          </div>
+          <div class="form-group" style="align-self: flex-end;">
+            <button class="btn-primary btn-sm" onclick="uploadCSV()">Import</button>
+          </div>
+        </div>
+
+        <div id="templateHint" class="batch-template-hint">
+          <strong>Expected columns:</strong> <code>firstName, lastName, email, studentNumber, year, password</code>
+        </div>
+
+        <!-- Import Results -->
+        <div id="importResults" class="batch-results" style="display:none;">
+          <div class="batch-results-header">
+            <span id="importSummary"></span>
+          </div>
+          <div id="importErrors" class="batch-errors" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div id="dashMsg" class="success-message" style="display:none;"></div>
+    </main>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/smu-logo.png" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+    let allStudents = [];
+    let selectedCourseID = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Professor';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
+        loadCourses();
+        loadAllStudents();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    function showMsg(text) {
+      const el = document.getElementById('dashMsg');
+      el.textContent = text;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
+
+    async function loadCourses() {
+      const res = await fetch('/api/courses');
+      const courses = await res.json();
+      const container = document.getElementById('coursesList');
+
+      if (courses.length === 0) {
+        container.innerHTML = '<p class="muted">No courses yet. Create one above.</p>';
+        return;
+      }
+
+      container.innerHTML = courses.map(c => `
+        <div class="course-card" onclick="selectCourse(${c.courseID}, '${c.courseNumber} - ${c.courseName}')">
+          <div class="course-info">
+            <strong>${c.courseNumber}</strong> - ${c.courseName}
+            <span class="course-meta">${c.semester} ${c.year}</span>
+          </div>
+          <span class="course-arrow">&rarr;</span>
+        </div>
+      `).join('');
+    }
+
+    async function loadAllStudents() {
+      const res = await fetch('/api/students');
+      allStudents = await res.json();
+      const sel = document.getElementById('studentSelect');
+      sel.innerHTML = '<option value="">-- Choose a student --</option>';
+      allStudents.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.studentID;
+        opt.textContent = s.firstName + ' ' + s.lastName + ' (' + s.email + ')';
+        sel.appendChild(opt);
+      });
+    }
+
+    async function selectCourse(courseID, label) {
+      selectedCourseID = courseID;
+      document.getElementById('enrollCourseName').textContent = label;
+      document.getElementById('enrollmentSection').style.display = 'block';
+      loadEnrollments(courseID);
+    }
+
+    async function loadEnrollments(courseID) {
+      const res = await fetch('/api/courses/' + courseID + '/enrollments');
+      const rows = await res.json();
+      const tbody = document.getElementById('enrollmentBody');
+
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="muted">No students enrolled yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td>${r.firstName} ${r.lastName}</td>
+          <td>${r.email}</td>
+          <td>${r.studentNumber || '--'}</td>
+          <td>${new Date(r.enrollmentDate).toLocaleDateString()}</td>
+          <td><button class="btn-danger btn-xs" onclick="removeEnrollment(${r.enrollmentID})">Remove</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function enrollStudent() {
+      const studentID = document.getElementById('studentSelect').value;
+      if (!studentID || !selectedCourseID) return alert('Select a student and course.');
+
+      const res = await fetch('/api/courses/' + selectedCourseID + '/enrollments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentID })
+      });
+
+      if (res.ok) {
+        showMsg('Student enrolled successfully');
+        loadEnrollments(selectedCourseID);
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Error enrolling student');
+      }
+    }
+
+    async function removeEnrollment(enrollmentID) {
+      if (!confirm('Remove this enrollment?')) return;
+      const res = await fetch('/api/enrollments/' + enrollmentID, { method: 'DELETE' });
+      if (res.ok) {
+        showMsg('Enrollment removed');
+        loadEnrollments(selectedCourseID);
+      }
+    }
+
+    document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        courseName: document.getElementById('courseName').value,
+        courseNumber: document.getElementById('courseNumber').value,
+        semester: document.getElementById('semester').value,
+        year: parseInt(document.getElementById('year').value)
+      };
+
+      const res = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        showMsg('Course created successfully');
+        e.target.reset();
+        loadCourses();
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Error creating course');
+      }
+    });
+
+    // ===== Batch CSV Import =====
+    const templateColumns = {
+      students: 'firstName, lastName, email, studentNumber, year, password',
+      courses: 'courseName, courseNumber, semester, year',
+      enrollments: 'studentEmail, courseNumber'
+    };
+
+    function updateTemplateHint() {
+      const type = document.getElementById('importType').value;
+      document.getElementById('templateHint').innerHTML =
+        '<strong>Expected columns:</strong> <code>' + templateColumns[type] + '</code>';
+      document.getElementById('importResults').style.display = 'none';
+    }
+
+    async function uploadCSV() {
+      const type = document.getElementById('importType').value;
+      const fileInput = document.getElementById('csvFile');
+      const file = fileInput.files[0];
+
+      if (!file) return alert('Please select a CSV file.');
+      if (!file.name.endsWith('.csv')) return alert('File must be a .csv file.');
+
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      const resultsDiv = document.getElementById('importResults');
+      const summaryEl = document.getElementById('importSummary');
+      const errorsDiv = document.getElementById('importErrors');
+
+      summaryEl.textContent = 'Importing...';
+      resultsDiv.style.display = 'block';
+      errorsDiv.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/batch/' + type, {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          summaryEl.innerHTML = '&#10003; Imported <strong>' + result.imported + '</strong> of <strong>' + result.total + '</strong> rows successfully.';
+          summaryEl.className = 'batch-summary-success';
+
+          if (result.errors && result.errors.length > 0) {
+            errorsDiv.innerHTML = '<strong>Skipped rows:</strong><ul>' +
+              result.errors.map(e => '<li>Row ' + e.row + ': ' + e.message + '</li>').join('') +
+              '</ul>';
+            errorsDiv.style.display = 'block';
+          }
+
+          fileInput.value = '';
+          // Refresh relevant data
+          if (type === 'students') loadAllStudents();
+          if (type === 'courses') loadCourses();
+          if (type === 'enrollments' && selectedCourseID) loadEnrollments(selectedCourseID);
+        } else {
+          summaryEl.textContent = result.message || 'Import failed.';
+          summaryEl.className = 'batch-summary-error';
+        }
+      } catch {
+        summaryEl.textContent = 'Unable to connect to server.';
+        summaryEl.className = 'batch-summary-error';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
