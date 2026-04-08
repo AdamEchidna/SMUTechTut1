@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Course - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/create-course.html" class="active">
+          <span class="icon">&#9998;</span>
+          <span>Create Course</span>
+        </a>
+        <a href="/assign-course.html">
+          <span class="icon">&#128203;</span>
+          <span>Assign Course</span>
+        </a>
+        <a href="#">
+          <span class="icon">&#10038;</span>
+          <span>Group Students</span>
+        </a>
+        <a href="#">
+          <span class="icon">&#9733;</span>
+          <span>Analytics</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div>
+            <div class="user-name" id="userName">Professor</div>
+            <div class="user-role">Professor</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content has-topbar">
+      <div class="page-header">
+        <h1>Your Courses</h1>
+      </div>
+
+      <div class="prof-info-row">
+        <span class="prof-label">Professor:</span>
+        <span class="prof-value" id="profName">--</span>
+        <span class="prof-label" style="margin-left:24px;">Professor ID:</span>
+        <span class="prof-value" id="profId">--</span>
+      </div>
+
+      <!-- Batch Import Courses CSV -->
+      <div class="content-card" style="margin-top:20px;">
+        <h2>Batch Import Courses (CSV)</h2>
+        <p class="batch-subtitle">Upload a CSV file to bulk-import courses.</p>
+        <div class="batch-import-row">
+          <div class="form-group">
+            <label for="csvFile">CSV File</label>
+            <input type="file" id="csvFile" accept=".csv" class="file-input">
+          </div>
+          <div class="form-group" style="align-self: flex-end;">
+            <button class="btn-primary btn-sm" onclick="uploadCourseCSV()">Import</button>
+          </div>
+        </div>
+        <div class="batch-template-hint">
+          <strong>Expected columns:</strong> <code>courseName, courseNumber, semester, year</code>
+        </div>
+        <div id="importResults" class="batch-results" style="display:none;">
+          <div class="batch-results-header"><span id="importSummary"></span></div>
+          <div id="importErrors" class="batch-errors" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Course Actions Row -->
+      <div class="actions-row">
+        <div class="bulk-actions">
+          <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+          <select id="bulkAction" class="bulk-select">
+            <option value="delete">Delete Selected</option>
+          </select>
+          <button class="btn-sm btn-outline" onclick="applyBulkAction()">Apply</button>
+        </div>
+        <button class="btn-primary btn-sm" onclick="openCreateModal()">+ Create New Course</button>
+      </div>
+
+      <!-- Courses Table -->
+      <table class="data-table courses-manage-table">
+        <thead>
+          <tr>
+            <th style="width:40px;"></th>
+            <th>Course ID</th>
+            <th>Course Name</th>
+            <th>Course Number</th>
+            <th>Semester</th>
+            <th>Year</th>
+          </tr>
+        </thead>
+        <tbody id="coursesBody">
+          <tr><td colspan="6" class="muted">Loading...</td></tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Create Course Modal -->
+  <div id="createCourseModal" class="modal-overlay" style="display:none;" onclick="closeCreateModal(event)">
+    <div class="modal-box modal-wide" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Add a Course</h2>
+        <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3 class="modal-section-title">Course Details</h3>
+        <form id="createCourseForm">
+          <div class="form-group">
+            <label for="modalCourseName">Course Name <span class="required">*</span></label>
+            <input type="text" id="modalCourseName" placeholder="e.g. Accounting Analytics Capstone" required>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label for="modalCourseNumber">Course Number <span class="required">*</span></label>
+              <input type="text" id="modalCourseNumber" placeholder="e.g. ACCT414" required>
+            </div>
+            <div class="form-group">
+              <label for="modalYear">Year <span class="required">*</span></label>
+              <input type="number" id="modalYear" placeholder="2026" required>
+            </div>
+            <div class="form-group">
+              <label for="modalSemester">Semester <span class="required">*</span></label>
+              <select id="modalSemester" required>
+                <option value="Spring">Spring</option>
+                <option value="Summer">Summer</option>
+                <option value="Fall">Fall</option>
+                <option value="Winter">Winter</option>
+              </select>
+            </div>
+          </div>
+
+          <h3 class="modal-section-title" style="margin-top:20px;">Course Settings</h3>
+          <div class="form-group" style="max-width:200px;">
+            <label for="modalStatus">Course Status <span class="required">*</span></label>
+            <select id="modalStatus">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-outline" onclick="closeCreateModal()">Cancel</button>
+            <button type="submit" class="btn-primary btn-sm">Create Course</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Professor';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
+        document.getElementById('profName').textContent = currentUser.name || '--';
+        document.getElementById('profId').textContent = currentUser.id || '--';
+        loadCourses();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadCourses() {
+      const res = await fetch('/api/courses');
+      const courses = await res.json();
+      const tbody = document.getElementById('coursesBody');
+
+      if (courses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="muted">No courses yet. Create one above.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = courses.map(c => `
+        <tr>
+          <td><input type="checkbox" class="course-check" value="${c.courseID}"></td>
+          <td>${c.courseID}</td>
+          <td>${c.courseName}</td>
+          <td>${c.courseNumber}</td>
+          <td>${c.semester}</td>
+          <td>${c.year}</td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleSelectAll() {
+      const checked = document.getElementById('selectAll').checked;
+      document.querySelectorAll('.course-check').forEach(cb => cb.checked = checked);
+    }
+
+    async function applyBulkAction() {
+      const action = document.getElementById('bulkAction').value;
+      if (!action) return;
+      const selected = [...document.querySelectorAll('.course-check:checked')].map(cb => cb.value);
+      if (selected.length === 0) return alert('No courses selected.');
+
+      if (action === 'delete') {
+        if (!confirm('Delete ' + selected.length + ' course(s)?')) return;
+        for (const id of selected) {
+          await fetch('/api/courses/' + id, { method: 'DELETE' });
+        }
+        loadCourses();
+      }
+    }
+
+    function openCreateModal() {
+      document.getElementById('createCourseModal').style.display = 'flex';
+    }
+
+    function closeCreateModal(e) {
+      if (!e || e.target === document.getElementById('createCourseModal')) {
+        document.getElementById('createCourseModal').style.display = 'none';
+      }
+    }
+
+    document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        courseName: document.getElementById('modalCourseName').value,
+        courseNumber: document.getElementById('modalCourseNumber').value,
+        semester: document.getElementById('modalSemester').value,
+        year: parseInt(document.getElementById('modalYear').value)
+      };
+
+      const res = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        closeCreateModal();
+        e.target.reset();
+        loadCourses();
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Error creating course');
+      }
+    });
+
+    async function uploadCourseCSV() {
+      const fileInput = document.getElementById('csvFile');
+      const file = fileInput.files[0];
+      if (!file) return alert('Please select a CSV file.');
+
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      const resultsDiv = document.getElementById('importResults');
+      const summaryEl = document.getElementById('importSummary');
+      const errorsDiv = document.getElementById('importErrors');
+
+      summaryEl.textContent = 'Importing...';
+      resultsDiv.style.display = 'block';
+      errorsDiv.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/batch/courses', { method: 'POST', body: formData });
+        const result = await res.json();
+
+        if (res.ok) {
+          summaryEl.innerHTML = '&#10003; Imported <strong>' + result.imported + '</strong> of <strong>' + result.total + '</strong> rows.';
+          summaryEl.className = 'batch-summary-success';
+          if (result.errors && result.errors.length > 0) {
+            errorsDiv.innerHTML = '<strong>Skipped rows:</strong><ul>' +
+              result.errors.map(e => '<li>Row ' + e.row + ': ' + e.message + '</li>').join('') + '</ul>';
+            errorsDiv.style.display = 'block';
+          }
+          fileInput.value = '';
+          loadCourses();
+        } else {
+          summaryEl.textContent = result.message || 'Import failed.';
+          summaryEl.className = 'batch-summary-error';
+        }
+      } catch {
+        summaryEl.textContent = 'Unable to connect to server.';
+        summaryEl.className = 'batch-summary-error';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

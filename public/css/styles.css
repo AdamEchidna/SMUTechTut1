@@ -25,57 +25,161 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ===== LOGIN PAGE ===== */
+body.login-page {
+  background: #0F165C;
+  overflow-x: hidden;
+}
+
+.login-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+.login-top-logo {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  z-index: 10;
+}
+
+.login-top-logo img {
+  height: 60px;
+  width: auto;
+  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+}
+
 .login-container {
+  position: relative;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0F165C 0%, #151C53 50%, #0F165C 100%);
+  padding: 100px 20px 40px;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .login-card {
-  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  padding: 48px 40px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  padding: 44px 40px 36px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   text-align: center;
 }
 
-.login-card .logo {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
-  background: #0F165C;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #96794E;
-  font-size: 28px;
-  font-weight: 700;
-  font-family: 'Oswald', sans-serif;
-  letter-spacing: 1px;
-  border: 3px solid #96794E;
+.login-icon {
+  margin-bottom: 12px;
 }
 
 .login-card h1 {
   color: #0F165C;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 18px;
+  letter-spacing: 0.3px;
+}
+
+.login-role-label {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 8px;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.login-card .subtitle {
-  color: #96794E;
+.login-role-toggle {
+  max-width: 220px;
+  margin: 0 auto 20px;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.input-with-icon input {
+  padding-left: 42px !important;
+}
+
+.login-options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: -4px;
+}
+
+.remember-me {
   font-size: 13px;
-  margin-bottom: 32px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+  accent-color: #0F165C;
+  width: 15px;
+  height: 15px;
+}
+
+.forgot-link-inline {
+  font-size: 13px;
+  color: #0F165C;
+  text-decoration: none;
   font-weight: 500;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+}
+
+.forgot-link-inline:hover {
+  text-decoration: underline;
+  color: #96794E;
+}
+
+.login-btn {
+  border-radius: 24px;
+  padding: 13px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+.login-create-link {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #666;
+}
+
+.login-create-link a {
+  color: #0F165C;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-create-link a:hover {
+  text-decoration: underline;
+  color: #96794E;
 }
 
 .form-group {
@@ -308,8 +412,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 180px;
   height: auto;
   margin-bottom: 8px;
-  filter: invert(1);
-  mix-blend-mode: screen;
+  filter: brightness(0) invert(1);
 }
 
 .sidebar-header h2 {
@@ -1004,6 +1107,514 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 3px;
 }
 
+/* ===== TOP BAR ===== */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 250px;
+  right: 0;
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+  z-index: 50;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: #0F165C;
+  height: 100%;
+  padding: 0 28px;
+  clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%);
+  padding-left: 44px;
+}
+
+.top-bar-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.top-bar-avatar svg {
+  stroke: #fff;
+}
+
+.btn-logout-top {
+  padding: 7px 22px;
+  border: 1.5px solid #fff;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Libre Franklin', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-logout-top:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== PROFESSOR DASHBOARD ===== */
+.prof-dashboard,
+.has-topbar {
+  padding-top: 76px !important;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.dash-section-title {
+  font-size: 20px;
+  color: #141B4D;
+  font-weight: 500;
+  margin-bottom: 16px;
+  font-family: 'Oswald', sans-serif;
+}
+
+.dash-courses-table {
+  width: 100%;
+}
+
+.course-link {
+  color: #0F165C;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.course-link:hover {
+  text-decoration: underline;
+  color: #96794E;
+}
+
+/* Recent Evaluations */
+.recent-evals-search {
+  margin-bottom: 16px;
+}
+
+.eval-search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Libre Franklin', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.eval-search-input:focus {
+  border-color: #0F165C;
+  box-shadow: 0 0 0 3px rgba(15, 22, 92, 0.1);
+}
+
+.recent-eval-card {
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.eval-name-bar {
+  background: linear-gradient(90deg, #96794E, #b8975f);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.eval-details {
+  padding: 14px 16px;
+  background: #fff;
+}
+
+.eval-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.eval-stars {
+  color: #96794E;
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+
+.eval-date {
+  font-size: 13px;
+  color: #888;
+}
+
+.eval-course-tag {
+  font-size: 12px;
+  background: #f0f1f8;
+  color: #0F165C;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.eval-scores {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.eval-comment {
+  font-size: 13px;
+  color: #555;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #96794E;
+}
+
+.see-more {
+  color: #0F165C;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.see-more:hover {
+  text-decoration: underline;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-wide {
+  max-width: 680px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h2 {
+  font-size: 20px;
+  color: #141B4D;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px 24px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modal-section-title {
+  font-size: 15px;
+  color: #96794E;
+  font-family: 'Oswald', sans-serif;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.detail-row {
+  padding: 6px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.detail-row strong {
+  color: #141B4D;
+}
+
+/* ===== PROFESSOR INFO ROW ===== */
+.prof-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.prof-label {
+  font-size: 14px;
+  color: #96794E;
+  font-weight: 600;
+  font-family: 'Oswald', sans-serif;
+}
+
+.prof-value {
+  font-size: 14px;
+  color: #333;
+  padding: 4px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+
+/* ===== ACTIONS ROW ===== */
+.actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 16px;
+}
+
+.bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-select {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Libre Franklin', sans-serif;
+  background: #fff;
+}
+
+.btn-outline {
+  padding: 7px 18px;
+  border: 1.5px solid #0F165C;
+  border-radius: 6px;
+  background: #fff;
+  color: #0F165C;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Libre Franklin', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-outline:hover {
+  background: #0F165C;
+  color: #fff;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.required {
+  color: #dc2626;
+}
+
+/* ===== COURSES MANAGE TABLE ===== */
+.courses-manage-table th:first-child,
+.courses-manage-table td:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+.courses-manage-table th {
+  color: #96794E;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+}
+
+/* ===== ASSIGN ADD SECTION ===== */
+.assign-add-title {
+  font-size: 16px;
+  color: #96794E;
+  font-weight: 600;
+  font-family: 'Oswald', sans-serif;
+  margin-bottom: 14px;
+}
+
+.assign-add-section {
+  margin-bottom: 28px;
+}
+
+.btn-apply-changes {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: #0F165C;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Libre Franklin', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-apply-changes:hover {
+  background: #1a2270;
+}
+
+/* ===== ASSIGN COURSE PAGE ===== */
+.assign-section {
+  margin-bottom: 24px;
+}
+
+.assign-label {
+  font-size: 14px;
+  color: #96794E;
+  font-weight: 600;
+  font-family: 'Oswald', sans-serif;
+  margin-bottom: 8px;
+}
+
+.course-dropdown {
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Libre Franklin', sans-serif;
+  outline: none;
+  background: #fff;
+}
+
+.course-dropdown:focus {
+  border-color: #0F165C;
+}
+
+.assign-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.assign-action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.assign-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 10px 16px;
+}
+
+.assign-toggle-btn.active {
+  background: #0F165C;
+  color: #fff;
+  border-color: #0F165C;
+}
+
+.assign-panel {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.assign-subtitle {
+  font-size: 18px;
+  color: #141B4D;
+  font-weight: 500;
+  font-family: 'Oswald', sans-serif;
+  margin-bottom: 12px;
+  text-decoration: underline;
+}
+
+.enrolled-section {
+  margin-top: 8px;
+}
+
+.enrolled-updated {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.enrolled-updated span {
+  padding: 2px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f8f9fa;
+  font-size: 12px;
+}
+
+.enrolled-table th {
+  color: #96794E;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+}
+
+.assign-group-link {
+  color: #0F165C;
+  text-decoration: underline;
+  font-size: 13px;
+}
+
+.assign-group-link:hover {
+  color: #96794E;
+}
+
 /* ===== REVIEW MODAL ===== */
 .review-modal-overlay {
   position: fixed;
@@ -1166,8 +1777,7 @@ h1, h2, h3, h4, h5, h6 {
   width: 200px;
   height: auto;
   margin-bottom: 8px;
-  filter: invert(1);
-  mix-blend-mode: screen;
+  filter: brightness(0) invert(1);
 }
 
 .footer-brand .footer-admin {
@@ -1261,6 +1871,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Footer for full-width pages (login, signup, etc.) */
 .login-page-footer {
+  position: relative;
+  z-index: 5;
   width: 100%;
 }
 

@@ -81,6 +81,16 @@ app.get("/evaluation.html", requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "evaluation.html"))
 })
 
+app.get("/create-course.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "professor") return res.redirect("/evaluation.html")
+  res.sendFile(path.join(__dirname, "public", "create-course.html"))
+})
+
+app.get("/assign-course.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "professor") return res.redirect("/evaluation.html")
+  res.sendFile(path.join(__dirname, "public", "assign-course.html"))
+})
+
 // ===================== AUTH API =====================
 
 // Login - checks both Professor and Student tables
@@ -92,14 +102,17 @@ app.post("/api/login", async (req, res) => {
   }
 
   try {
-    // Check Professor table first
+    // Check Professor table first - look up by email
     const [professors] = await pool.execute(
-      "SELECT professorID, email, firstName, lastName, password FROM Professor WHERE email = ? AND password = ?",
-      [email, password]
+      "SELECT professorID, email, firstName, lastName, password FROM Professor WHERE email = ?",
+      [email]
     )
 
     if (professors.length > 0) {
       const prof = professors[0]
+      if (prof.password !== password) {
+        return res.status(401).json({ message: "Invalid password" })
+      }
       req.session.user = {
         id: prof.professorID,
         name: prof.firstName + " " + prof.lastName,
@@ -109,14 +122,17 @@ app.post("/api/login", async (req, res) => {
       return res.json({ message: "Login successful", role: "professor" })
     }
 
-    // Check Student table
+    // Check Student table - look up by email
     const [students] = await pool.execute(
-      "SELECT studentID, email, firstName, lastName, password FROM Student WHERE email = ? AND password = ?",
-      [email, password]
+      "SELECT studentID, email, firstName, lastName, password FROM Student WHERE email = ?",
+      [email]
     )
 
     if (students.length > 0) {
       const stu = students[0]
+      if (stu.password !== password) {
+        return res.status(401).json({ message: "Invalid password" })
+      }
       req.session.user = {
         id: stu.studentID,
         name: stu.firstName + " " + stu.lastName,
@@ -126,7 +142,7 @@ app.post("/api/login", async (req, res) => {
       return res.json({ message: "Login successful", role: "student" })
     }
 
-    return res.status(401).json({ message: "Invalid email or password" })
+    return res.status(401).json({ message: "Invalid email address" })
   } catch (err) {
     console.error("Login error:", err)
     res.status(500).json({ message: "Server error" })
@@ -252,6 +268,15 @@ app.get("/api/courses", requireAuth, requireProfessor, async (req, res) => {
 app.post("/api/courses", requireAuth, requireProfessor, async (req, res) => {
   const { courseName, courseNumber, semester, year } = req.body
   try {
+    // Check for duplicate course number for this professor
+    const [existing] = await pool.execute(
+      "SELECT courseID FROM Course WHERE courseNumber = ? AND professorID = ?",
+      [courseNumber, req.session.user.id]
+    )
+    if (existing.length > 0) {
+      return res.status(409).json({ message: "A course with this course number already exists" })
+    }
+
     const [result] = await pool.execute(
       "INSERT INTO Course (courseName, courseNumber, semester, year, professorID) VALUES (?, ?, ?, ?, ?)",
       [courseName, courseNumber, semester, year, req.session.user.id]
@@ -259,6 +284,19 @@ app.post("/api/courses", requireAuth, requireProfessor, async (req, res) => {
     res.json({ courseID: result.insertId, message: "Course created" })
   } catch (err) {
     console.error("Error creating course:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Delete a course
+app.delete("/api/courses/:courseID", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    // Remove enrollments first, then delete the course
+    await pool.execute("DELETE FROM Course_Enrollments WHERE courseID = ?", [req.params.courseID])
+    await pool.execute("DELETE FROM Course WHERE courseID = ? AND professorID = ?", [req.params.courseID, req.session.user.id])
+    res.json({ message: "Course deleted" })
+  } catch (err) {
+    console.error("Error deleting course:", err)
     res.status(500).json({ message: "Server error" })
   }
 })
@@ -298,6 +336,15 @@ app.get("/api/courses/:courseID/enrollments", requireAuth, requireProfessor, asy
 app.post("/api/courses/:courseID/enrollments", requireAuth, requireProfessor, async (req, res) => {
   const { studentID } = req.body
   try {
+    // Check for duplicate enrollment
+    const [existing] = await pool.execute(
+      "SELECT enrollmentID FROM Course_Enrollments WHERE studentID = ? AND courseID = ?",
+      [studentID, req.params.courseID]
+    )
+    if (existing.length > 0) {
+      return res.status(409).json({ message: "Student already enrolled in course" })
+    }
+
     await pool.execute(
       "INSERT INTO Course_Enrollments (enrollmentDate, studentID, courseID) VALUES (NOW(), ?, ?)",
       [studentID, req.params.courseID]
@@ -318,6 +365,191 @@ app.delete("/api/enrollments/:enrollmentID", requireAuth, requireProfessor, asyn
     console.error("Error removing enrollment:", err)
     res.status(500).json({ message: "Server error" })
   }
+})
+
+// Get courses with enrollment counts and eval counts for dashboard
+app.get("/api/dashboard/courses", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT c.courseID, c.courseName, c.courseNumber, c.semester, c.year,
+              COUNT(DISTINCT ce.studentID) AS enrolledCount,
+              COUNT(DISTINCT pe.evaluationID) AS evalsCompleted
+       FROM Course c
+       LEFT JOIN Course_Enrollments ce ON c.courseID = ce.courseID
+       LEFT JOIN Assignment a ON a.courseID = c.courseID
+       LEFT JOIN Peer_Evaluation pe ON pe.assignmentID = a.assignmentID
+       WHERE c.professorID = ?
+       GROUP BY c.courseID`,
+      [req.session.user.id]
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error("Error fetching dashboard courses:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Get recent evaluations across all professor's courses
+app.get("/api/dashboard/recent-evaluations", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT DISTINCT pe.evaluationID, pe.dateSubmitted, pe.contributesToTeam, pe.facilitatesContribution,
+              pe.planningAndManaging, pe.fostersTeamEnvironment, pe.managesConflict,
+              pe.overall, pe.comments,
+              s.firstName AS evaluatedFirst, s.lastName AS evaluatedLast,
+              COALESCE(c1.courseName, c2.courseName) AS courseName,
+              COALESCE(c1.courseNumber, c2.courseNumber) AS courseNumber
+       FROM Peer_Evaluation pe
+       JOIN Student s ON pe.evaluatedID = s.studentID
+       LEFT JOIN Assignment a ON pe.assignmentID = a.assignmentID
+       LEFT JOIN Course c1 ON a.courseID = c1.courseID
+       LEFT JOIN Course_Enrollments ce ON ce.studentID = pe.evaluatorID
+       LEFT JOIN Course c2 ON ce.courseID = c2.courseID AND c2.professorID = ?
+       WHERE c1.professorID = ? OR c2.professorID = ?
+       ORDER BY pe.dateSubmitted DESC
+       LIMIT 20`,
+      [req.session.user.id, req.session.user.id, req.session.user.id]
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error("Error fetching recent evaluations:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Get course details (for popup) including enrolled students
+app.get("/api/courses/:courseID/details", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    const [courses] = await pool.execute(
+      "SELECT * FROM Course WHERE courseID = ? AND professorID = ?",
+      [req.params.courseID, req.session.user.id]
+    )
+    if (courses.length === 0) return res.status(404).json({ message: "Course not found" })
+
+    const [students] = await pool.execute(
+      `SELECT s.studentID, s.firstName, s.lastName, s.email, s.studentNumber
+       FROM Course_Enrollments ce
+       JOIN Student s ON ce.studentID = s.studentID
+       WHERE ce.courseID = ?`,
+      [req.params.courseID]
+    )
+
+    res.json({ course: courses[0], students })
+  } catch (err) {
+    console.error("Error fetching course details:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Enroll a student by details (manual add from assign-course page)
+app.post("/api/courses/:courseID/enroll-manual", requireAuth, requireProfessor, async (req, res) => {
+  const { firstName, lastName, studentNumber, email } = req.body
+  if (!firstName || !lastName || !email) {
+    return res.status(400).json({ message: "First name, last name, and email are required" })
+  }
+  if (!studentNumber || !studentNumber.trim()) {
+    return res.status(400).json({ message: "Student ID is required" })
+  }
+
+  try {
+    // Find or create student
+    let [existing] = await pool.execute("SELECT studentID FROM Student WHERE email = ?", [email])
+    let studentID
+
+    if (existing.length > 0) {
+      studentID = existing[0].studentID
+      // Always update studentNumber
+      await pool.execute("UPDATE Student SET studentNumber = ? WHERE studentID = ?", [studentNumber, studentID])
+    } else {
+      // Create a student stub (no password - they can sign up later)
+      const [result] = await pool.execute(
+        "INSERT INTO Student (email, firstName, lastName, studentNumber, password) VALUES (?, ?, ?, ?, ?)",
+        [email, firstName, lastName, studentNumber, "Temp1234"]
+      )
+      studentID = result.insertId
+    }
+
+    // Check if already enrolled
+    const [enrolled] = await pool.execute(
+      "SELECT enrollmentID FROM Course_Enrollments WHERE studentID = ? AND courseID = ?",
+      [studentID, req.params.courseID]
+    )
+    if (enrolled.length > 0) {
+      return res.status(409).json({ message: "Student is already enrolled in this course" })
+    }
+
+    await pool.execute(
+      "INSERT INTO Course_Enrollments (enrollmentDate, studentID, courseID) VALUES (NOW(), ?, ?)",
+      [studentID, req.params.courseID]
+    )
+    res.json({ message: "Student enrolled successfully" })
+  } catch (err) {
+    console.error("Error enrolling student manually:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Import students from CSV and enroll them in a course (assign-course page)
+app.post("/api/courses/:courseID/import-students", requireAuth, requireProfessor, csvUpload.single("csv"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ message: "No CSV file uploaded" })
+
+  const { headers, rows } = parseCSV(req.file.buffer)
+  const required = ["firstName", "lastName", "email", "studentNumber"]
+  const missing = required.filter(h => !headers.includes(h))
+  if (missing.length > 0) {
+    return res.status(400).json({ message: "Missing required columns: " + missing.join(", ") })
+  }
+
+  let enrolled = 0
+  const errors = []
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    try {
+      if (!r.firstName || !r.lastName || !r.email || !r.studentNumber) {
+        errors.push({ row: i + 2, message: "Missing required fields" })
+        continue
+      }
+
+      // Find or create student by email
+      let [existing] = await pool.execute("SELECT studentID FROM Student WHERE email = ?", [r.email])
+      let studentID
+
+      if (existing.length > 0) {
+        studentID = existing[0].studentID
+        // Always update studentNumber from CSV
+        await pool.execute("UPDATE Student SET studentNumber = ? WHERE studentID = ?", [r.studentNumber, studentID])
+      } else {
+        // Create student stub with password from CSV or default
+        const pw = r.password || "Temp1234"
+        const [result] = await pool.execute(
+          "INSERT INTO Student (email, firstName, lastName, studentNumber, year, password) VALUES (?, ?, ?, ?, ?, ?)",
+          [r.email, r.firstName, r.lastName, r.studentNumber, r.year || null, pw]
+        )
+        studentID = result.insertId
+      }
+
+      // Check for duplicate enrollment
+      const [enrolledCheck] = await pool.execute(
+        "SELECT enrollmentID FROM Course_Enrollments WHERE studentID = ? AND courseID = ?",
+        [studentID, req.params.courseID]
+      )
+      if (enrolledCheck.length > 0) {
+        errors.push({ row: i + 2, message: "Student already enrolled in course: " + r.email })
+        continue
+      }
+
+      await pool.execute(
+        "INSERT INTO Course_Enrollments (enrollmentDate, studentID, courseID) VALUES (NOW(), ?, ?)",
+        [studentID, req.params.courseID]
+      )
+      enrolled++
+    } catch (err) {
+      errors.push({ row: i + 2, message: err.message })
+    }
+  }
+
+  res.json({ enrolled, total: rows.length, errors })
 })
 
 // ===================== BATCH IMPORT API =====================
@@ -381,6 +613,14 @@ app.post("/api/batch/courses", requireAuth, requireProfessor, csvUpload.single("
     try {
       if (!r.courseName || !r.courseNumber || !r.semester || !r.year) {
         errors.push({ row: i + 2, message: "Missing required fields" })
+        continue
+      }
+      const [existingCourse] = await pool.execute(
+        "SELECT courseID FROM Course WHERE courseNumber = ? AND professorID = ?",
+        [r.courseNumber, req.session.user.id]
+      )
+      if (existingCourse.length > 0) {
+        errors.push({ row: i + 2, message: "Course already exists: " + r.courseNumber })
         continue
       }
       await pool.execute(

@@ -6,35 +6,70 @@
   <title>Login - SMU Peer Evaluation</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
+<body class="login-page">
+  <!-- Background Image -->
+  <div class="login-bg" style="background-image: url('/images/SMU_Admin_Building.jpg');"></div>
+
+  <!-- Top-left SMU Logo -->
+  <div class="login-top-logo">
+    <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo">
+  </div>
+
+  <!-- Login Card -->
   <div class="login-container">
-    <div class="login-card">
-      <div class="logo">SMU</div>
-      <h1>Peer Evaluation</h1>
-      <p class="subtitle">Singapore Management University</p>
+    <div class="login-card glass-card">
+      <div class="login-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+      </div>
+
+      <h1>Sign in with Email</h1>
+
+      <p class="login-role-label">Select account type</p>
+      <div class="role-toggle login-role-toggle">
+        <button type="button" class="role-btn" data-role="professor" onclick="setLoginRole('professor')">Professor</button>
+        <button type="button" class="role-btn" data-role="student" onclick="setLoginRole('student')">Student</button>
+      </div>
 
       <div id="errorMsg" class="error-message"></div>
 
       <form id="loginForm">
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="yourname@smu.edu.sg" required>
+          <div class="input-with-icon">
+            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M22 4l-10 8L2 4"/>
+            </svg>
+            <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+          </div>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+          <div class="input-with-icon">
+            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+          </div>
         </div>
-        <div class="forgot-link">
-          <a href="/forgot-password.html">Forgot Password?</a>
+
+        <div class="login-options-row">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe"> Remember me
+          </label>
+          <a href="/forgot-password.html" class="forgot-link-inline">Forgot Password?</a>
         </div>
-        <button type="submit" class="btn-primary">Sign In</button>
+
+        <button type="submit" class="btn-primary login-btn">Login</button>
       </form>
 
-      <div class="login-divider"><span>or</span></div>
-      <a href="/signup.html" class="btn-secondary btn-block">Create an Account</a>
-
-      <div class="login-footer">
-        <p>Singapore Management University</p>
+      <div class="login-create-link">
+        Don't have an account? <a href="/signup.html">Create an Account</a>
       </div>
     </div>
   </div>
@@ -43,7 +78,7 @@
   <footer class="smu-footer login-page-footer">
     <div class="footer-main">
       <div class="footer-brand">
-        <img src="/images/smu-logo.png" alt="SMU Logo" class="footer-logo-img">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
         <div class="footer-admin">
           <h4>Administration Building</h4>
           <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
@@ -88,14 +123,41 @@
   </footer>
 
   <script>
+    let selectedLoginRole = null;
+
+    function setLoginRole(role) {
+      selectedLoginRole = role;
+      document.querySelectorAll('.login-role-toggle .role-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.login-role-toggle .role-btn[data-role="${role}"]`).classList.add('active');
+      // Clear error when role is selected
+      document.getElementById('errorMsg').classList.remove('show');
+    }
+
+    function showError(msg) {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const errorMsg = document.getElementById('errorMsg');
 
       errorMsg.classList.remove('show');
+
+      // Client-side validation
+      if (!selectedLoginRole) {
+        return showError('Please select your account type to sign in');
+      }
+      if (!email) {
+        return showError('Please enter your email to sign in');
+      }
+      if (!password) {
+        return showError('Please enter your password to sign in');
+      }
 
       try {
         const res = await fetch('/api/login', {
@@ -109,12 +171,10 @@
         if (res.ok) {
           window.location.href = data.role === 'professor' ? '/dashboard.html' : '/evaluation.html';
         } else {
-          errorMsg.textContent = data.message || 'Invalid credentials';
-          errorMsg.classList.add('show');
+          showError(data.message || 'Invalid credentials');
         }
       } catch (err) {
-        errorMsg.textContent = 'Unable to connect to server';
-        errorMsg.classList.add('show');
+        showError('Unable to connect to server');
       }
     });
   </script>

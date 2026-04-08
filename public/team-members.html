@@ -11,7 +11,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <img src="/images/smu-logo.png" alt="SMU Logo" class="sidebar-logo-img">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
         <p>Peer Evaluation System</p>
       </div>
       <nav class="sidebar-nav">
@@ -36,12 +36,21 @@
             <div class="user-role">Student</div>
           </div>
         </div>
-        <button class="btn-logout" onclick="logout()">Sign Out</button>
       </div>
     </aside>
 
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content has-topbar">
       <div class="page-header">
         <h1>Team Members</h1>
         <p>View the students assigned to your courses and groups.</p>
@@ -59,7 +68,7 @@
   <footer class="smu-footer dashboard-footer">
     <div class="footer-main">
       <div class="footer-brand">
-        <img src="/images/smu-logo.png" alt="SMU Logo" class="footer-logo-img">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
         <div class="footer-admin">
           <h4>Administration Building</h4>
           <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>

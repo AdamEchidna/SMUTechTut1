@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assign Course - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/create-course.html">
+          <span class="icon">&#9998;</span>
+          <span>Create Course</span>
+        </a>
+        <a href="/assign-course.html" class="active">
+          <span class="icon">&#128203;</span>
+          <span>Assign Course</span>
+        </a>
+        <a href="#">
+          <span class="icon">&#10038;</span>
+          <span>Group Students</span>
+        </a>
+        <a href="#">
+          <span class="icon">&#9733;</span>
+          <span>Analytics</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div>
+            <div class="user-name" id="userName">Professor</div>
+            <div class="user-role">Professor</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content has-topbar">
+      <div class="page-header">
+        <h1>Assign Course</h1>
+      </div>
+
+      <!-- Course Selector -->
+      <div class="assign-section">
+        <p class="assign-label">Choose course to assign students</p>
+        <select id="courseSelect" class="course-dropdown" onchange="onCourseChange()">
+          <option value="">-- Select a course --</option>
+        </select>
+      </div>
+
+      <div id="assignContent" style="display:none;">
+        <div class="assign-add-section">
+          <h3 class="assign-add-title">Add students to course</h3>
+          <div class="assign-left">
+            <div class="assign-action-btns">
+              <button class="btn-outline btn-sm assign-toggle-btn active" id="btnCSV" onclick="showCSVPanel()">
+                <span>&#8593;</span> Upload Class Roster (CSV)
+              </button>
+              <button class="btn-outline btn-sm assign-toggle-btn" id="btnManual" onclick="showManualPanel()">
+                <span>&#9998;</span> Manual Input
+              </button>
+            </div>
+
+            <!-- CSV Panel -->
+            <div id="csvPanel" class="assign-panel">
+              <div class="batch-import-row" style="flex-direction:column; gap:12px;">
+                <div class="form-group">
+                  <label for="studentCsvFile">CSV File</label>
+                  <input type="file" id="studentCsvFile" accept=".csv" class="file-input">
+                </div>
+                <button class="btn-primary btn-sm" onclick="uploadStudentCSV()">Import Students</button>
+              </div>
+              <div class="batch-template-hint" style="margin-top:8px;">
+                <strong>Expected columns:</strong> <code>firstName, lastName, email, studentNumber</code>
+              </div>
+              <div id="csvImportResults" class="batch-results" style="display:none;">
+                <div class="batch-results-header"><span id="csvImportSummary"></span></div>
+                <div id="csvImportErrors" class="batch-errors" style="display:none;"></div>
+              </div>
+            </div>
+
+            <!-- Manual Panel -->
+            <div id="manualPanel" class="assign-panel" style="display:none;">
+              <form id="manualAddForm">
+                <div class="form-group">
+                  <label for="manFirstName">First Name</label>
+                  <input type="text" id="manFirstName" required>
+                </div>
+                <div class="form-group">
+                  <label for="manLastName">Last Name</label>
+                  <input type="text" id="manLastName" required>
+                </div>
+                <div class="form-group">
+                  <label for="manStudentId">Student ID</label>
+                  <input type="number" id="manStudentId" required placeholder="e.g. 1005">
+                </div>
+                <div class="form-group">
+                  <label for="manEmail">Email</label>
+                  <input type="email" id="manEmail" required>
+                </div>
+                <button type="submit" class="btn-primary btn-sm" style="margin-top:8px;">Add Student</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enrolled Students -->
+        <div class="enrolled-section">
+          <h2 class="assign-subtitle">Enrolled Students:</h2>
+          <p class="enrolled-updated">Last Updated: <span id="lastUpdated">--</span></p>
+
+          <div class="actions-row" style="margin-top:12px;">
+            <div class="bulk-actions">
+              <input type="checkbox" id="selectAllStudents" onchange="toggleSelectAllStudents()">
+              <select id="studentBulkAction" class="bulk-select">
+                <option value="remove">Remove Student</option>
+                <option value="group">Group Students</option>
+              </select>
+            </div>
+          </div>
+
+          <table class="data-table enrolled-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"></th>
+                <th>Full Name</th>
+                <th>Student ID</th>
+                <th>Email</th>
+                <th>Assigned Group</th>
+              </tr>
+            </thead>
+            <tbody id="enrolledBody">
+              <tr><td colspan="5" class="muted">Select a course to view enrolled students.</td></tr>
+            </tbody>
+          </table>
+
+          <div class="enrolled-actions" style="margin-top:16px;">
+            <button class="btn-apply-changes" onclick="applyStudentBulk()">Apply Changes</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+    let selectedCourseID = null;
+    let editMode = false;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Professor';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
+        loadCourseDropdown();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadCourseDropdown() {
+      const res = await fetch('/api/courses');
+      const courses = await res.json();
+      const sel = document.getElementById('courseSelect');
+      sel.innerHTML = '<option value="">-- Select a course --</option>';
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.courseID;
+        opt.textContent = c.courseNumber + ' - ' + c.courseName;
+        sel.appendChild(opt);
+      });
+    }
+
+    function onCourseChange() {
+      const val = document.getElementById('courseSelect').value;
+      if (val) {
+        selectedCourseID = val;
+        document.getElementById('assignContent').style.display = 'block';
+        loadEnrolledStudents();
+      } else {
+        selectedCourseID = null;
+        document.getElementById('assignContent').style.display = 'none';
+      }
+    }
+
+    async function loadEnrolledStudents() {
+      const res = await fetch('/api/courses/' + selectedCourseID + '/enrollments');
+      const rows = await res.json();
+      const tbody = document.getElementById('enrolledBody');
+
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="muted">No students enrolled yet.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td><input type="checkbox" class="student-check" value="${r.enrollmentID}"></td>
+          <td>${r.firstName} ${r.lastName}</td>
+          <td>${r.studentNumber || '--'}</td>
+          <td>${r.email}</td>
+          <td><a href="#" class="assign-group-link">Assign Group</a></td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleSelectAllStudents() {
+      const checked = document.getElementById('selectAllStudents').checked;
+      document.querySelectorAll('.student-check').forEach(cb => cb.checked = checked);
+    }
+
+    async function applyStudentBulk() {
+      const sel = document.getElementById('studentBulkAction');
+      const action = sel.value;
+      const selected = [...document.querySelectorAll('.student-check:checked')].map(cb => cb.value);
+      if (selected.length === 0) return alert('No students selected.');
+
+      if (action === 'remove') {
+        if (!confirm('Remove ' + selected.length + ' student(s) from this course?')) return;
+        for (const id of selected) {
+          await fetch('/api/enrollments/' + id, { method: 'DELETE' });
+        }
+        sel.selectedIndex = 0;
+        document.getElementById('selectAllStudents').checked = false;
+        loadEnrolledStudents();
+      } else if (action === 'group') {
+        alert('Group Students feature coming in Sprint 3.');
+      }
+    }
+
+    // CSV / Manual toggle
+    function showCSVPanel() {
+      document.getElementById('csvPanel').style.display = 'block';
+      document.getElementById('manualPanel').style.display = 'none';
+      document.getElementById('btnCSV').classList.add('active');
+      document.getElementById('btnManual').classList.remove('active');
+    }
+
+    function showManualPanel() {
+      document.getElementById('csvPanel').style.display = 'none';
+      document.getElementById('manualPanel').style.display = 'block';
+      document.getElementById('btnCSV').classList.remove('active');
+      document.getElementById('btnManual').classList.add('active');
+    }
+
+    // Manual add student
+    document.getElementById('manualAddForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!selectedCourseID) return alert('Please select a course first.');
+
+      const studentId = document.getElementById('manStudentId').value.trim();
+      if (!studentId) return alert('Student ID is required.');
+
+      const data = {
+        firstName: document.getElementById('manFirstName').value.trim(),
+        lastName: document.getElementById('manLastName').value.trim(),
+        studentNumber: studentId,
+        email: document.getElementById('manEmail').value.trim()
+      };
+
+      const res = await fetch('/api/courses/' + selectedCourseID + '/enroll-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        e.target.reset();
+        loadEnrolledStudents();
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Error adding student');
+      }
+    });
+
+    // CSV upload for students
+    async function uploadStudentCSV() {
+      if (!selectedCourseID) return alert('Please select a course first.');
+
+      const fileInput = document.getElementById('studentCsvFile');
+      const file = fileInput.files[0];
+      if (!file) return alert('Please select a CSV file.');
+
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      const resultsDiv = document.getElementById('csvImportResults');
+      const summaryEl = document.getElementById('csvImportSummary');
+      const errorsDiv = document.getElementById('csvImportErrors');
+
+      summaryEl.textContent = 'Importing...';
+      resultsDiv.style.display = 'block';
+      errorsDiv.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/courses/' + selectedCourseID + '/import-students', { method: 'POST', body: formData });
+        const result = await res.json();
+
+        if (res.ok) {
+          summaryEl.innerHTML = '&#10003; Enrolled <strong>' + result.enrolled + '</strong> of <strong>' + result.total + '</strong> students.';
+          summaryEl.className = 'batch-summary-success';
+
+          if (result.errors && result.errors.length > 0) {
+            errorsDiv.innerHTML = '<strong>Skipped rows:</strong><ul>' +
+              result.errors.map(e => '<li>Row ' + e.row + ': ' + e.message + '</li>').join('') + '</ul>';
+            errorsDiv.style.display = 'block';
+          }
+          fileInput.value = '';
+          loadEnrolledStudents();
+        } else {
+          summaryEl.textContent = result.message || 'Import failed.';
+          summaryEl.className = 'batch-summary-error';
+        }
+      } catch {
+        summaryEl.textContent = 'Unable to connect to server.';
+        summaryEl.className = 'batch-summary-error';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
