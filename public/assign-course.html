@@ -26,9 +26,13 @@
           <span class="icon">&#128203;</span>
           <span>Assign Course</span>
         </a>
-        <a href="#">
-          <span class="icon">&#10038;</span>
+        <a href="/group-students.html">
+          <span class="icon">&#128101;</span>
           <span>Group Students</span>
+        </a>
+        <a href="/schedule-evaluations.html">
+          <span class="icon">&#9200;</span>
+          <span>Schedule Evaluations</span>
         </a>
         <a href="#">
           <span class="icon">&#9733;</span>
@@ -93,7 +97,7 @@
                 <button class="btn-primary btn-sm" onclick="uploadStudentCSV()">Import Students</button>
               </div>
               <div class="batch-template-hint" style="margin-top:8px;">
-                <strong>Expected columns:</strong> <code>firstName, lastName, email, studentNumber</code>
+                <strong>Expected columns:</strong> <code>firstName, lastName, email, studentNumber, groupName</code>
               </div>
               <div id="csvImportResults" class="batch-results" style="display:none;">
                 <div class="batch-results-header"><span id="csvImportSummary"></span></div>
@@ -270,7 +274,7 @@
           <td>${r.firstName} ${r.lastName}</td>
           <td>${r.studentNumber || '--'}</td>
           <td>${r.email}</td>
-          <td><a href="#" class="assign-group-link">Assign Group</a></td>
+          <td>${r.groupName ? '<span class="group-tag">' + r.groupName + '</span>' : '<a href="/group-students.html" class="assign-group-link">Assign Group</a>'}</td>
         </tr>
       `).join('');
     }

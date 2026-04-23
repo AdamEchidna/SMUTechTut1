@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Students - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/create-course.html">
+          <span class="icon">&#9998;</span>
+          <span>Create Course</span>
+        </a>
+        <a href="/assign-course.html">
+          <span class="icon">&#128203;</span>
+          <span>Assign Course</span>
+        </a>
+        <a href="/group-students.html" class="active">
+          <span class="icon">&#128101;</span>
+          <span>Group Students</span>
+        </a>
+        <a href="/schedule-evaluations.html">
+          <span class="icon">&#9200;</span>
+          <span>Schedule Evaluations</span>
+        </a>
+        <a href="#">
+          <span class="icon">&#9733;</span>
+          <span>Analytics</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div>
+            <div class="user-name" id="userName">Professor</div>
+            <div class="user-role">Professor</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content has-topbar">
+      <div class="page-header">
+        <h1>Group Students</h1>
+      </div>
+
+      <div class="content-card">
+        <div class="eval-field" style="margin-bottom: 20px;">
+          <label><strong style="color:#B8860B;">Select Course</strong></label>
+          <select id="courseSelect" style="min-width: 320px;">
+            <option value="">Select Course</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="groupArea" style="display:none;">
+        <div class="group-workspace">
+          <!-- Class Roster (ungrouped students) -->
+          <div class="roster-panel">
+            <h3>Class Roster</h3>
+            <input type="text" id="rosterSearch" placeholder="Search students" class="roster-search-input">
+            <div id="rosterList" class="roster-list"></div>
+          </div>
+
+          <!-- Group Cards -->
+          <div id="groupCards" class="group-cards-area">
+          </div>
+        </div>
+
+        <a href="#" id="createNewGroupLink" class="create-group-link" onclick="openCreateGroupModal(); return false;">+ Create New Group</a>
+
+        <div class="form-actions" style="margin-top: 24px;">
+          <button class="btn-secondary" onclick="window.location.reload()">Cancel</button>
+          <button class="btn-primary" onclick="saveGroups()">Save Groups</button>
+        </div>
+      </div>
+
+      <div id="successMsg" class="success-message" style="display:none;">Groups saved successfully!</div>
+    </main>
+  </div>
+
+  <!-- Create Group Modal -->
+  <div id="createGroupModal" class="modal-overlay" style="display:none;" onclick="closeCreateGroupModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2>Create a Group</h2>
+        <button class="modal-close" onclick="closeCreateGroupModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3 style="color:#B8860B; margin-bottom:12px;">Group Details</h3>
+        <div class="form-group">
+          <label>Choose Course <span style="color:red;">*</span></label>
+          <select id="modalCourseSelect" style="width:100%;" disabled>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Group Name <span style="color:red;">*</span></label>
+          <input type="text" id="modalGroupName" placeholder="SMU Lions" maxlength="30" style="width:100%;">
+          <small style="color:#999;">Max 30 characters. No numbers allowed.</small>
+        </div>
+
+        <h3 style="color:#B8860B; margin-top:20px; margin-bottom:12px;">Group Settings</h3>
+        <div style="display:flex; gap:20px;">
+          <div class="form-group">
+            <label>Minimum Group Members:</label>
+            <input type="number" id="modalMinMembers" value="3" min="1" max="20" style="width:70px;">
+          </div>
+          <div class="form-group">
+            <label>Maximum Group Members:</label>
+            <input type="number" id="modalMaxMembers" value="5" min="1" max="20" style="width:70px;">
+          </div>
+        </div>
+
+        <div id="modalError" class="error-msg" style="display:none;"></div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; padding:16px 24px;">
+        <button class="btn-secondary" onclick="closeCreateGroupModal()">Cancel</button>
+        <button class="btn-primary" onclick="createGroup()">Create Group</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+    let selectedCourseID = null;
+    let allStudents = [];
+    let groupsData = [];
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Professor';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
+        loadCourses();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadCourses() {
+      const res = await fetch('/api/courses');
+      const courses = await res.json();
+      const sel = document.getElementById('courseSelect');
+      const modalSel = document.getElementById('modalCourseSelect');
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.courseID;
+        opt.textContent = c.courseNumber + ' - ' + c.courseName;
+        sel.appendChild(opt);
+        modalSel.appendChild(opt.cloneNode(true));
+      });
+    }
+
+    document.getElementById('courseSelect').addEventListener('change', async function() {
+      selectedCourseID = this.value;
+      const groupArea = document.getElementById('groupArea');
+      if (!selectedCourseID) { groupArea.style.display = 'none'; return; }
+
+      // Sync modal course dropdown
+      document.getElementById('modalCourseSelect').value = selectedCourseID;
+
+      // Load enrollments and groups
+      const [enrollRes, groupRes] = await Promise.all([
+        fetch('/api/courses/' + selectedCourseID + '/enrollments'),
+        fetch('/api/courses/' + selectedCourseID + '/groups')
+      ]);
+      allStudents = await enrollRes.json();
+      groupsData = await groupRes.json();
+
+      renderGroupWorkspace();
+      groupArea.style.display = 'block';
+    });
+
+    function renderGroupWorkspace() {
+      // Collect all grouped student IDs
+      const groupedIDs = new Set();
+      groupsData.forEach(g => {
+        (g.members || []).forEach(m => groupedIDs.add(m.studentID));
+      });
+
+      // Render roster (ungrouped students)
+      renderRoster(groupedIDs);
+      renderGroupCards();
+    }
+
+    function renderRoster(groupedIDs) {
+      const roster = document.getElementById('rosterList');
+      const ungrouped = allStudents.filter(s => !groupedIDs.has(s.studentID));
+      if (ungrouped.length === 0) {
+        roster.innerHTML = '<p class="muted" style="padding:8px;">All students are assigned to groups.</p>';
+        return;
+      }
+      roster.innerHTML = ungrouped.map(s =>
+        '<div class="roster-item" draggable="true" data-student-id="' + s.studentID + '" ondragstart="dragStart(event)">' +
+        s.firstName + ' ' + s.lastName + '</div>'
+      ).join('');
+    }
+
+    function renderGroupCards() {
+      const container = document.getElementById('groupCards');
+      if (groupsData.length === 0) {
+        container.innerHTML = '<p class="muted">No groups created yet. Use "+ Create New Group" below.</p>';
+        return;
+      }
+      container.innerHTML = groupsData.map(g => {
+        const membersHtml = (g.members || []).map(m =>
+          '<div class="group-member-item" data-student-id="' + m.studentID + '">' +
+          m.firstName + ' ' + m.lastName +
+          ' <span class="remove-member" onclick="removeMember(' + g.groupID + ',' + m.studentID + ')">&times;</span></div>'
+        ).join('');
+        const placeholder = (g.members || []).length === 0
+          ? '<div class="group-drop-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 18c0-3 2-5 6-5s6 2 6 5"/><path d="M14 18c0-3 2-5 6-5"/></svg><br>Drag students here</div>'
+          : '';
+        return '<div class="group-card" data-group-id="' + g.groupID + '" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="dropStudent(event, ' + g.groupID + ')">' +
+          '<h3 class="group-card-title">' + g.groupName + '</h3>' +
+          '<div class="group-members-list">' + membersHtml + placeholder + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    // Drag and drop handlers
+    function dragStart(e) {
+      e.dataTransfer.setData('text/plain', e.target.dataset.studentId);
+    }
+    function allowDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('group-card-dragover');
+    }
+    function dragLeave(e) {
+      e.currentTarget.classList.remove('group-card-dragover');
+    }
+    function dropStudent(e, groupID) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('group-card-dragover');
+      const studentID = parseInt(e.dataTransfer.getData('text/plain'));
+      const student = allStudents.find(s => s.studentID === studentID);
+      if (!student) return;
+
+      // Add to group data
+      const group = groupsData.find(g => g.groupID === groupID);
+      if (!group) return;
+      if (!group.members) group.members = [];
+      if (group.members.some(m => m.studentID === studentID)) return;
+      group.members.push({ studentID: student.studentID, firstName: student.firstName, lastName: student.lastName });
+
+      renderGroupWorkspace();
+    }
+
+    function removeMember(groupID, studentID) {
+      const group = groupsData.find(g => g.groupID === groupID);
+      if (!group) return;
+      group.members = (group.members || []).filter(m => m.studentID !== studentID);
+      renderGroupWorkspace();
+    }
+
+    // Roster search
+    document.getElementById('rosterSearch').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('.roster-item').forEach(el => {
+        el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+
+    // Create group modal
+    function openCreateGroupModal() {
+      document.getElementById('createGroupModal').style.display = 'flex';
+      document.getElementById('modalGroupName').value = '';
+      document.getElementById('modalError').style.display = 'none';
+    }
+    function closeCreateGroupModal(e) {
+      if (!e || e.target === document.getElementById('createGroupModal')) {
+        document.getElementById('createGroupModal').style.display = 'none';
+      }
+    }
+
+    async function createGroup() {
+      const name = document.getElementById('modalGroupName').value.trim();
+      const courseID = selectedCourseID;
+      const errEl = document.getElementById('modalError');
+
+      if (!courseID) {
+        errEl.textContent = 'No courses found. You must have at least one course before creating student groups. Go to "Create Course" to add a course.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!name) {
+        errEl.textContent = 'Please fill out all required fields';
+        errEl.style.display = 'block'; return;
+      }
+      if (name.length > 30) {
+        errEl.textContent = 'Max 30 characters allowed';
+        errEl.style.display = 'block'; return;
+      }
+      if (/\d/.test(name)) {
+        errEl.textContent = 'Group name cannot contain numbers';
+        errEl.style.display = 'block'; return;
+      }
+
+      try {
+        const res = await fetch('/api/groups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groupName: name, courseID: courseID })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.message;
+          errEl.style.display = 'block'; return;
+        }
+        // Add new group to local data and re-render
+        groupsData.push({ groupID: data.groupID, groupName: name, courseID: courseID, members: [] });
+        renderGroupWorkspace();
+        closeCreateGroupModal();
+      } catch {
+        errEl.textContent = 'Unable to connect to server';
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function saveGroups() {
+      const payload = groupsData.map(g => ({
+        groupID: g.groupID,
+        studentIDs: (g.members || []).map(m => m.studentID)
+      }));
+
+      try {
+        const res = await fetch('/api/courses/' + selectedCourseID + '/save-groups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ groups: payload })
+        });
+        if (res.ok) {
+          document.getElementById('successMsg').style.display = 'block';
+          setTimeout(() => { document.getElementById('successMsg').style.display = 'none'; }, 3000);
+        } else {
+          const err = await res.json();
+          alert(err.message || 'Error saving groups');
+        }
+      } catch {
+        alert('Unable to connect to server');
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

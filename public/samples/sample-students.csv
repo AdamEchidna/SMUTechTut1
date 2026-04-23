@@ -1,6 +1,6 @@
-firstName,lastName,email,studentNumber,year,password
-Alice,Tran,alice.tran@smu.edu.sg,100900001,2,Password1
-Bob,Lim,bob.lim@smu.edu.sg,100200002,3,Password2
-Charlie,Wong,charlie.wong@smu.edu.sg,100300003,1,Password3
-Diana,Chen,diana.chen@smu.edu.sg,100400004,4,Password4
-Ethan,Goh,ethan.goh@smu.edu.sg,100500005,2,Password5
+firstName,lastName,email,studentNumber,year,password,groupName
+Alice,Tran,alice.tran@smu.edu.sg,100900001,2,Password1,Best Group
+Bob,Lim,bob.lim@smu.edu.sg,100200002,3,Password2,Best Group
+Charlie,Wong,charlie.wong@smu.edu.sg,100300003,1,Password3,SMU Accountants
+Diana,Chen,diana.chen@smu.edu.sg,100400004,4,Password4,SMU Accountants
+Ethan,Goh,ethan.goh@smu.edu.sg,100500005,2,Password5,SMU Accountants

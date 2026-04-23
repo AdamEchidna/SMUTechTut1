@@ -169,7 +169,7 @@
         const data = await res.json();
 
         if (res.ok) {
-          window.location.href = data.role === 'professor' ? '/dashboard.html' : '/evaluation.html';
+          window.location.href = data.role === 'professor' ? '/dashboard.html' : '/student-dashboard.html';
         } else {
           showError(data.message || 'Invalid credentials');
         }

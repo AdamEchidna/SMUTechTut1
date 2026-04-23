@@ -65,14 +65,14 @@ function requireStudent(req, res, next) {
 // Redirect root based on role
 app.get("/", (req, res) => {
   if (req.session && req.session.user) {
-    return res.redirect(req.session.user.role === "professor" ? "/dashboard.html" : "/evaluation.html")
+    return res.redirect(req.session.user.role === "professor" ? "/dashboard.html" : "/student-dashboard.html")
   }
   res.redirect("/login.html")
 })
 
 // Protect pages
 app.get("/dashboard.html", requireAuth, (req, res) => {
-  if (req.session.user.role !== "professor") return res.redirect("/evaluation.html")
+  if (req.session.user.role !== "professor") return res.redirect("/student-dashboard.html")
   res.sendFile(path.join(__dirname, "public", "dashboard.html"))
 })
 
@@ -82,13 +82,33 @@ app.get("/evaluation.html", requireAuth, (req, res) => {
 })
 
 app.get("/create-course.html", requireAuth, (req, res) => {
-  if (req.session.user.role !== "professor") return res.redirect("/evaluation.html")
+  if (req.session.user.role !== "professor") return res.redirect("/student-dashboard.html")
   res.sendFile(path.join(__dirname, "public", "create-course.html"))
 })
 
 app.get("/assign-course.html", requireAuth, (req, res) => {
-  if (req.session.user.role !== "professor") return res.redirect("/evaluation.html")
+  if (req.session.user.role !== "professor") return res.redirect("/student-dashboard.html")
   res.sendFile(path.join(__dirname, "public", "assign-course.html"))
+})
+
+app.get("/student-dashboard.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "student") return res.redirect("/dashboard.html")
+  res.sendFile(path.join(__dirname, "public", "student-dashboard.html"))
+})
+
+app.get("/feedback.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "student") return res.redirect("/dashboard.html")
+  res.sendFile(path.join(__dirname, "public", "feedback.html"))
+})
+
+app.get("/group-students.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "professor") return res.redirect("/student-dashboard.html")
+  res.sendFile(path.join(__dirname, "public", "group-students.html"))
+})
+
+app.get("/schedule-evaluations.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "professor") return res.redirect("/student-dashboard.html")
+  res.sendFile(path.join(__dirname, "public", "schedule-evaluations.html"))
 })
 
 // ===================== AUTH API =====================
@@ -319,9 +339,12 @@ app.get("/api/courses/:courseID/enrollments", requireAuth, requireProfessor, asy
   try {
     const [rows] = await pool.execute(
       `SELECT ce.enrollmentID, ce.enrollmentDate, ce.studentID, ce.courseID,
-              s.firstName, s.lastName, s.email, s.studentNumber
+              s.firstName, s.lastName, s.email, s.studentNumber,
+              g.groupName
        FROM Course_Enrollments ce
        JOIN Student s ON ce.studentID = s.studentID
+       LEFT JOIN Group_Members gm ON gm.studentID = s.studentID
+       LEFT JOIN \`Group\` g ON gm.groupID = g.groupID AND g.courseID = ce.courseID
        WHERE ce.courseID = ?`,
       [req.params.courseID]
     )
@@ -543,6 +566,36 @@ app.post("/api/courses/:courseID/import-students", requireAuth, requireProfessor
         "INSERT INTO Course_Enrollments (enrollmentDate, studentID, courseID) VALUES (NOW(), ?, ?)",
         [studentID, req.params.courseID]
       )
+
+      // If groupName is provided, find or create group and add member
+      if (r.groupName && r.groupName.trim()) {
+        let [existingGroup] = await pool.execute(
+          "SELECT groupID FROM `Group` WHERE groupName = ? AND courseID = ?",
+          [r.groupName.trim(), req.params.courseID]
+        )
+        let groupID
+        if (existingGroup.length > 0) {
+          groupID = existingGroup[0].groupID
+        } else {
+          const [gResult] = await pool.execute(
+            "INSERT INTO `Group` (groupName, courseID) VALUES (?, ?)",
+            [r.groupName.trim(), req.params.courseID]
+          )
+          groupID = gResult.insertId
+        }
+        // Add student to group if not already a member
+        const [existingMember] = await pool.execute(
+          "SELECT memberID FROM Group_Members WHERE groupID = ? AND studentID = ?",
+          [groupID, studentID]
+        )
+        if (existingMember.length === 0) {
+          await pool.execute(
+            "INSERT INTO Group_Members (memberDate, groupID, studentID) VALUES (NOW(), ?, ?)",
+            [groupID, studentID]
+          )
+        }
+      }
+
       enrolled++
     } catch (err) {
       errors.push({ row: i + 2, message: err.message })
@@ -799,10 +852,12 @@ app.get("/api/my-feedback", requireAuth, requireStudent, async (req, res) => {
               pe.planningAndManaging, pe.fostersTeamEnvironment, pe.managesConflict,
               pe.overall, pe.comments,
               c.courseNumber, c.courseName,
-              a.title AS assignmentTitle
+              a.title AS assignmentTitle,
+              g.groupName
        FROM Peer_Evaluation pe
        LEFT JOIN Assignment a ON pe.assignmentID = a.assignmentID
        LEFT JOIN Course c ON a.courseID = c.courseID
+       LEFT JOIN \`Group\` g ON pe.groupID = g.groupID
        WHERE pe.evaluatedID = ?
        ORDER BY pe.dateSubmitted DESC`,
       [req.session.user.id]
@@ -848,6 +903,260 @@ app.get("/api/my-team-members", requireAuth, requireStudent, async (req, res) =>
     res.json(groupMembers)
   } catch (err) {
     console.error("Error fetching team members:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// ===================== PROFESSOR GROUP API =====================
+
+// Get all groups for a course (with members)
+app.get("/api/courses/:courseID/groups", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    const [groups] = await pool.execute(
+      "SELECT * FROM `Group` WHERE courseID = ?",
+      [req.params.courseID]
+    )
+    // For each group, get members
+    for (const g of groups) {
+      const [members] = await pool.execute(
+        `SELECT gm.memberID, gm.studentID, s.firstName, s.lastName, s.email, s.studentNumber
+         FROM Group_Members gm
+         JOIN Student s ON gm.studentID = s.studentID
+         WHERE gm.groupID = ?`,
+        [g.groupID]
+      )
+      g.members = members
+    }
+    res.json(groups)
+  } catch (err) {
+    console.error("Error fetching groups:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Create a new group
+app.post("/api/groups", requireAuth, requireProfessor, async (req, res) => {
+  const { groupName, courseID } = req.body
+  if (!groupName || !courseID) {
+    return res.status(400).json({ message: "Please fill out all required fields" })
+  }
+  if (groupName.length > 30) {
+    return res.status(400).json({ message: "Max 30 characters allowed" })
+  }
+  if (/\d/.test(groupName)) {
+    return res.status(400).json({ message: "Group name cannot contain numbers" })
+  }
+  try {
+    // Verify professor owns this course
+    const [courses] = await pool.execute(
+      "SELECT courseID FROM Course WHERE courseID = ? AND professorID = ?",
+      [courseID, req.session.user.id]
+    )
+    if (courses.length === 0) {
+      return res.status(403).json({ message: "No courses found. You must have at least one course before creating student groups. Go to \"Create Course\" to add a course." })
+    }
+    const [result] = await pool.execute(
+      "INSERT INTO `Group` (groupName, courseID) VALUES (?, ?)",
+      [groupName, courseID]
+    )
+    res.json({ groupID: result.insertId, message: "Group created" })
+  } catch (err) {
+    console.error("Error creating group:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Delete a group
+app.delete("/api/groups/:groupID", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    await pool.execute("DELETE FROM Group_Members WHERE groupID = ?", [req.params.groupID])
+    await pool.execute("DELETE FROM `Group` WHERE groupID = ?", [req.params.groupID])
+    res.json({ message: "Group deleted" })
+  } catch (err) {
+    console.error("Error deleting group:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Save group memberships (bulk) — replaces all members for all groups of a course
+app.post("/api/courses/:courseID/save-groups", requireAuth, requireProfessor, async (req, res) => {
+  const { groups } = req.body // [{ groupID, studentIDs: [1,2,3] }, ...]
+  if (!groups || !Array.isArray(groups)) {
+    return res.status(400).json({ message: "Invalid data" })
+  }
+  try {
+    for (const g of groups) {
+      // Remove all current members from this group
+      await pool.execute("DELETE FROM Group_Members WHERE groupID = ?", [g.groupID])
+      // Add new members
+      for (const sid of g.studentIDs) {
+        await pool.execute(
+          "INSERT INTO Group_Members (memberDate, groupID, studentID) VALUES (NOW(), ?, ?)",
+          [g.groupID, sid]
+        )
+      }
+    }
+    res.json({ message: "Groups saved successfully" })
+  } catch (err) {
+    console.error("Error saving groups:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// ===================== PROFESSOR SCHEDULE EVALUATIONS API =====================
+
+// Schedule an evaluation (create assignment)
+app.post("/api/assignments", requireAuth, requireProfessor, async (req, res) => {
+  const { courseID, groupIDs, title, openDate, openTime, closeDate, closeTime } = req.body
+
+  // Validation
+  if (!courseID) {
+    return res.status(400).json({ message: "Missing required selections: course is required." })
+  }
+  if (!groupIDs || groupIDs.length === 0) {
+    if (!courseID) {
+      return res.status(400).json({ message: "Missing required selections: please select a course and at least one group to schedule peer evaluations." })
+    }
+    return res.status(400).json({ message: "Missing required selections: select at least one group to continue." })
+  }
+  if (!openDate || !closeDate) {
+    return res.status(400).json({ message: "Missing evaluation dates: please select a start and end date to schedule peer evaluations." })
+  }
+
+  const startDT = openDate + ' ' + (openTime || '08:00') + ':00'
+  const endDT = closeDate + ' ' + (closeTime || '23:59') + ':00'
+  const evalTitle = title || 'Peer Evaluation'
+
+  try {
+    const [result] = await pool.execute(
+      "INSERT INTO Assignment (title, openDate, closeDate, professorID, courseID) VALUES (?, ?, ?, ?, ?)",
+      [evalTitle, startDT, endDT, req.session.user.id, courseID]
+    )
+    res.json({ assignmentID: result.insertId, message: "Evaluation scheduled successfully" })
+  } catch (err) {
+    console.error("Error scheduling evaluation:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// Get all assignments for professor (for schedule page)
+app.get("/api/my-assignments", requireAuth, requireProfessor, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT a.*, c.courseName, c.courseNumber
+       FROM Assignment a
+       JOIN Course c ON a.courseID = c.courseID
+       WHERE a.professorID = ?
+       ORDER BY a.openDate DESC`,
+      [req.session.user.id]
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error("Error fetching assignments:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
+// ===================== STUDENT DASHBOARD API =====================
+
+// Get student's group and evaluations for a specific course
+app.get("/api/student/dashboard/:courseID", requireAuth, requireStudent, async (req, res) => {
+  try {
+    // Get course info
+    const [courseRows] = await pool.execute(
+      `SELECT courseID, courseName, courseNumber FROM Course WHERE courseID = ?`,
+      [req.params.courseID]
+    )
+    const course = courseRows.length > 0 ? courseRows[0] : null
+
+    // Find the student's group in this course
+    const [groupInfo] = await pool.execute(
+      `SELECT g.groupID, g.groupName
+       FROM Group_Members gm
+       JOIN \`Group\` g ON gm.groupID = g.groupID
+       WHERE gm.studentID = ? AND g.courseID = ?`,
+      [req.session.user.id, req.params.courseID]
+    )
+
+    const group = groupInfo.length > 0 ? groupInfo[0] : null
+
+    // Get group members (excluding current student)
+    let members = []
+    if (group) {
+      const [m] = await pool.execute(
+        `SELECT s.studentID, s.firstName, s.lastName
+         FROM Group_Members gm
+         JOIN Student s ON gm.studentID = s.studentID
+         WHERE gm.groupID = ? AND gm.studentID != ?`,
+        [group.groupID, req.session.user.id]
+      )
+      members = m
+    }
+
+    // Get assignments (scheduled evaluations) for this course
+    const [assignments] = await pool.execute(
+      `SELECT a.assignmentID, a.title, a.openDate, a.closeDate
+       FROM Assignment a
+       WHERE a.courseID = ?
+       ORDER BY a.closeDate ASC`,
+      [req.params.courseID]
+    )
+
+    // Build evaluation rows: one row per member (with latest assignment context)
+    const evalRows = []
+    if (members.length > 0 && assignments.length > 0) {
+      // For each member × assignment combo
+      for (const member of members) {
+        for (const a of assignments) {
+          const [existing] = await pool.execute(
+            `SELECT evaluationID, isSubmitted FROM Peer_Evaluation
+             WHERE evaluatorID = ? AND evaluatedID = ? AND assignmentID = ?`,
+            [req.session.user.id, member.studentID, a.assignmentID]
+          )
+          const now = new Date()
+          const close = new Date(a.closeDate)
+          let status = 'Not Submitted'
+          if (existing.length > 0 && existing[0].isSubmitted) {
+            status = 'Completed'
+          } else if (existing.length > 0) {
+            status = 'In Progress'
+          } else if (now > close) {
+            status = 'Overdue'
+          }
+
+          evalRows.push({
+            peerName: member.firstName + ' ' + member.lastName,
+            studentID: member.studentID,
+            assignmentID: a.assignmentID,
+            assignmentTitle: a.title,
+            dueDate: a.closeDate,
+            groupName: group ? group.groupName : null,
+            courseNumber: course ? course.courseNumber : null,
+            courseName: course ? course.courseName : null,
+            status: status
+          })
+        }
+      }
+    } else if (members.length > 0) {
+      // Group members exist but no assignments scheduled yet
+      for (const member of members) {
+        evalRows.push({
+          peerName: member.firstName + ' ' + member.lastName,
+          studentID: member.studentID,
+          assignmentID: null,
+          assignmentTitle: null,
+          dueDate: null,
+          groupName: group ? group.groupName : null,
+          courseNumber: course ? course.courseNumber : null,
+          courseName: course ? course.courseName : null,
+          status: 'Not Scheduled'
+        })
+      }
+    }
+
+    res.json({ course, group, members, assignments, evaluations: evalRows })
+  } catch (err) {
+    console.error("Error fetching student dashboard:", err)
     res.status(500).json({ message: "Server error" })
   }
 })

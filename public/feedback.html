@@ -15,13 +15,13 @@
         <p>Peer Evaluation System</p>
       </div>
       <nav class="sidebar-nav">
+        <a href="/student-dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
         <a href="/evaluation.html">
           <span class="icon">&#9998;</span>
-          <span>Peer Evaluations</span>
-        </a>
-        <a href="/team-members.html">
-          <span class="icon">&#128101;</span>
-          <span>Team Members</span>
+          <span>Peer Reviews</span>
         </a>
         <a href="/feedback.html" class="active">
           <span class="icon">&#128172;</span>
@@ -143,13 +143,14 @@
             year: 'numeric', month: 'short', day: 'numeric'
           }) : '--';
           const course = fb.courseNumber ? fb.courseNumber + ' - ' + fb.courseName : 'N/A';
+          const group = fb.groupName ? fb.groupName : '';
 
           html += `
           <div class="content-card feedback-card">
             <div class="feedback-header">
               <div>
                 <h3>Evaluation #${i + 1}</h3>
-                <span class="feedback-meta">${course} &middot; ${date}</span>
+                <span class="feedback-meta">${course}${group ? ' &middot; ' + group : ''} &middot; ${date}</span>
               </div>
               <div class="feedback-overall">
                 <span class="overall-label">Overall</span>

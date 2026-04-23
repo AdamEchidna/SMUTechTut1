@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/student-dashboard.html" class="active">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/evaluation.html">
+          <span class="icon">&#9998;</span>
+          <span>Peer Reviews</span>
+        </a>
+        <a href="/feedback.html">
+          <span class="icon">&#128172;</span>
+          <span>Your Feedback</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">S</div>
+          <div>
+            <div class="user-name" id="userName">Student</div>
+            <div class="user-role">Student</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content has-topbar">
+      <div class="page-header">
+        <h1>Student Dashboard</h1>
+      </div>
+
+      <div class="content-card">
+        <h2 class="dash-section-title" style="margin-bottom: 16px;">Your Due Dates</h2>
+
+        <div class="eval-field" style="margin-bottom: 20px;">
+          <label for="courseSelect"><strong>Select Course</strong></label>
+          <select id="courseSelect" style="min-width: 280px;">
+            <option value="">Select Course</option>
+          </select>
+        </div>
+
+        <div id="groupInfo" style="display:none; margin-bottom: 20px;">
+          <span style="font-weight:600; color:#141B4D;">Group Name:</span>
+          <span id="groupName" class="group-tag" style="margin-left:8px;"></span>
+        </div>
+
+        <div id="evalsTableWrap" style="display:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Peer Name</th>
+                <th>Group</th>
+                <th>Course</th>
+                <th>Due Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="evalsBody">
+            </tbody>
+          </table>
+        </div>
+
+        <p id="noDataMsg" class="muted" style="display:none;">No evaluations scheduled for this course yet.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Student';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'S').charAt(0).toUpperCase();
+        loadCourses();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadCourses() {
+      const res = await fetch('/api/my-courses');
+      const courses = await res.json();
+      const sel = document.getElementById('courseSelect');
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.courseID;
+        opt.textContent = c.courseNumber + ' - ' + c.courseName;
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('courseSelect').addEventListener('change', async function() {
+      const courseID = this.value;
+      const groupInfo = document.getElementById('groupInfo');
+      const evalsWrap = document.getElementById('evalsTableWrap');
+      const noData = document.getElementById('noDataMsg');
+
+      groupInfo.style.display = 'none';
+      evalsWrap.style.display = 'none';
+      noData.style.display = 'none';
+
+      if (!courseID) return;
+
+      try {
+        const res = await fetch('/api/student/dashboard/' + courseID);
+        const data = await res.json();
+
+        if (data.group) {
+          document.getElementById('groupName').textContent = data.group.groupName;
+          groupInfo.style.display = 'block';
+        }
+
+        if (data.evaluations && data.evaluations.length > 0) {
+          const tbody = document.getElementById('evalsBody');
+          tbody.innerHTML = data.evaluations.map(ev => {
+            const due = ev.dueDate ? new Date(ev.dueDate).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'short', day: 'numeric'
+            }) : '--';
+            let badge = '';
+            if (ev.status === 'Completed') {
+              badge = '<span class="eval-status-badge status-completed">Completed</span>';
+            } else if (ev.status === 'In Progress') {
+              badge = '<span class="eval-status-badge status-in-progress">In Progress</span>';
+            } else if (ev.status === 'Overdue') {
+              badge = '<span class="eval-status-badge status-overdue">Overdue</span>';
+            } else if (ev.status === 'Not Scheduled') {
+              badge = '<span class="eval-status-badge status-not-submitted">Not Scheduled</span>';
+            } else {
+              badge = '<span class="eval-status-badge status-not-submitted">Not Submitted</span>';
+            }
+            const link = '/evaluation.html?courseID=' + courseID + '&studentID=' + ev.studentID;
+            const nameCell = '<a href="' + link + '" class="peer-eval-link">' + ev.peerName + '</a>';
+            const groupCell = ev.groupName || '--';
+            const courseCell = ev.courseNumber ? (ev.courseNumber + ' - ' + ev.courseName) : '--';
+            return '<tr><td>' + nameCell + '</td><td>' + groupCell + '</td><td>' + courseCell + '</td><td>' + due + '</td><td>' + badge + '</td></tr>';
+          }).join('');
+          evalsWrap.style.display = 'block';
+        } else {
+          noData.style.display = 'block';
+        }
+      } catch {
+        noData.textContent = 'Error loading dashboard data.';
+        noData.style.display = 'block';
+      }
+    });
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

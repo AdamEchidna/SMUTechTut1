@@ -15,13 +15,13 @@
         <p>Peer Evaluation System</p>
       </div>
       <nav class="sidebar-nav">
+        <a href="/student-dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
         <a href="/evaluation.html" class="active">
           <span class="icon">&#9998;</span>
-          <span>Peer Evaluations</span>
-        </a>
-        <a href="/team-members.html">
-          <span class="icon">&#128101;</span>
-          <span>Team Members</span>
+          <span>Peer Reviews</span>
         </a>
         <a href="/feedback.html">
           <span class="icon">&#128172;</span>
@@ -301,6 +301,23 @@
         opt.textContent = c.courseNumber + ' - ' + c.courseName;
         sel.appendChild(opt);
       });
+
+      // Auto-select from query params (linked from student dashboard)
+      const params = new URLSearchParams(window.location.search);
+      const qCourseID = params.get('courseID');
+      const qStudentID = params.get('studentID');
+      if (qCourseID) {
+        sel.value = qCourseID;
+        sel.dispatchEvent(new Event('change'));
+        if (qStudentID) {
+          // Wait for team members to load, then auto-select
+          setTimeout(() => {
+            const teamSel = document.getElementById('teamMemberSelect');
+            teamSel.value = qStudentID;
+            teamSel.dispatchEvent(new Event('change'));
+          }, 600);
+        }
+      }
     }
 
     document.getElementById('courseSelect').addEventListener('change', async function() {

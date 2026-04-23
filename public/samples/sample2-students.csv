@@ -1,6 +1,6 @@
-firstName,lastName,email,studentNumber,year,password
-Olivia,Tan,olivia.tan@smu.edu.sg,101000006,1,Password6
-Ryan,Lee,ryan.lee@smu.edu.sg,101100007,3,Password7
-Sophia,Ng,sophia.ng@smu.edu.sg,101200008,2,Password8
-Daniel,Ong,daniel.ong@smu.edu.sg,101300009,4,Password9
-Chloe,Yeo,chloe.yeo@smu.edu.sg,101400010,1,Password10
+firstName,lastName,email,studentNumber,year,password,groupName
+Olivia,Tan,olivia.tan@smu.edu.sg,101000006,1,Password6,Best Group
+Ryan,Lee,ryan.lee@smu.edu.sg,101100007,3,Password7,Best Group
+Sophia,Ng,sophia.ng@smu.edu.sg,101200008,2,Password8,SMU Finest
+Daniel,Ong,daniel.ong@smu.edu.sg,101300009,4,Password9,SMU Finest
+Chloe,Yeo,chloe.yeo@smu.edu.sg,101400010,1,Password10,SMU Finest

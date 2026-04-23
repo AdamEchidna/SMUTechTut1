@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Evaluations - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/create-course.html">
+          <span class="icon">&#9998;</span>
+          <span>Create Course</span>
+        </a>
+        <a href="/assign-course.html">
+          <span class="icon">&#128203;</span>
+          <span>Assign Course</span>
+        </a>
+        <a href="/group-students.html">
+          <span class="icon">&#128101;</span>
+          <span>Group Students</span>
+        </a>
+        <a href="/schedule-evaluations.html" class="active">
+          <span class="icon">&#9200;</span>
+          <span>Schedule Evaluations</span>
+        </a>
+        <a href="#">
+          <span class="icon">&#9733;</span>
+          <span>Analytics</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div>
+            <div class="user-name" id="userName">Professor</div>
+            <div class="user-role">Professor</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content has-topbar">
+      <div class="page-header">
+        <h1>Schedule Evaluations</h1>
+      </div>
+
+      <div class="content-card">
+        <!-- Select Course -->
+        <div class="eval-field" style="margin-bottom: 24px;">
+          <label><strong style="color:#B8860B;">Select Course</strong></label>
+          <select id="courseSelect" style="min-width: 320px;">
+            <option value="">Select Course</option>
+          </select>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #e0e0e0; margin:20px 0;">
+
+        <!-- Select Groups -->
+        <h3 style="color:#B8860B; margin-bottom:12px;">Select Groups to Schedule</h3>
+        <div id="groupCheckboxes" style="margin-bottom: 24px;">
+          <p class="muted">Select a course first.</p>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #e0e0e0; margin:20px 0;">
+
+        <!-- Evaluation Period -->
+        <h3 style="color:#B8860B; margin-bottom:12px;">Evaluation Period</h3>
+        <div class="schedule-dates">
+          <div class="date-row">
+            <label>Start Date:</label>
+            <input type="date" id="startDate">
+            <label style="margin-left:16px;">Time:</label>
+            <select id="startTime">
+              <option value="08:00">8:00 AM</option>
+              <option value="09:00">9:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="12:00">12:00 PM</option>
+              <option value="13:00">1:00 PM</option>
+              <option value="14:00">2:00 PM</option>
+              <option value="15:00">3:00 PM</option>
+              <option value="16:00">4:00 PM</option>
+              <option value="17:00">5:00 PM</option>
+              <option value="18:00">6:00 PM</option>
+            </select>
+          </div>
+          <div class="date-row" style="margin-top:12px;">
+            <label>End Date:</label>
+            <input type="date" id="endDate">
+            <label style="margin-left:16px;">Time:</label>
+            <select id="endTime">
+              <option value="23:59">11:59 PM</option>
+              <option value="17:00">5:00 PM</option>
+              <option value="18:00">6:00 PM</option>
+              <option value="20:00">8:00 PM</option>
+              <option value="21:00">9:00 PM</option>
+              <option value="22:00">10:00 PM</option>
+            </select>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #e0e0e0; margin:20px 0;">
+
+        <!-- Evaluation Settings -->
+        <h3 style="color:#B8860B; margin-bottom:12px;">Evaluation Settings</h3>
+        <div style="margin-bottom: 24px;">
+          <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <input type="checkbox" id="anonymousFeedback"> Anonymous Feedback
+          </label>
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="requireComments"> Require Additional Comments
+          </label>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #e0e0e0; margin:20px 0;">
+
+        <!-- Notification Settings -->
+        <h3 style="color:#B8860B; margin-bottom:12px;">Notification Settings</h3>
+        <div class="date-row">
+          <label>Notify Before:</label>
+          <input type="date" id="notifyDate">
+          <label style="margin-left:16px;">Every:</label>
+          <select id="notifyEvery" style="width:90px;">
+            <option value="1">1 day(s)</option>
+            <option value="2">2 day(s)</option>
+            <option value="3">3 day(s)</option>
+          </select>
+        </div>
+        <div class="date-row" style="margin-top:12px;">
+          <label>At:</label>
+          <select id="notifyTime">
+            <option value="08:00">8:00 AM</option>
+            <option value="09:00">9:00 AM</option>
+            <option value="10:00" selected>10:00 AM</option>
+            <option value="12:00">12:00 PM</option>
+            <option value="14:00">2:00 PM</option>
+            <option value="17:00">5:00 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="scheduleError" class="error-msg" style="display:none; margin-top:12px;"></div>
+      <div id="successMsg" class="success-message" style="display:none;">Evaluation scheduled successfully!</div>
+
+      <div class="form-actions" style="margin-top: 24px;">
+        <button class="btn-secondary" onclick="window.location.reload()">Cancel</button>
+        <button class="btn-primary" onclick="scheduleEvaluation()">Schedule Evaluation</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Professor';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
+        loadCourses();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    async function loadCourses() {
+      const res = await fetch('/api/courses');
+      const courses = await res.json();
+      const sel = document.getElementById('courseSelect');
+      courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.courseID;
+        opt.textContent = c.courseNumber + ' - ' + c.courseName;
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('courseSelect').addEventListener('change', async function() {
+      const courseID = this.value;
+      const container = document.getElementById('groupCheckboxes');
+
+      if (!courseID) {
+        container.innerHTML = '<p class="muted">Select a course first.</p>';
+        return;
+      }
+
+      const res = await fetch('/api/courses/' + courseID + '/groups');
+      const groups = await res.json();
+
+      if (groups.length === 0) {
+        container.innerHTML = '<p class="muted">No groups found for this course. Go to "Group Students" to create groups first.</p>';
+        return;
+      }
+
+      let html = '<label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:600;">' +
+        '<input type="checkbox" id="selectAllGroups" onchange="toggleAllGroups(this)"> Select all</label>';
+      groups.forEach(g => {
+        html += '<label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; margin-left:16px;">' +
+          '<input type="checkbox" class="group-check" value="' + g.groupID + '"> ' + g.groupName + '</label>';
+      });
+      container.innerHTML = html;
+    });
+
+    function toggleAllGroups(el) {
+      document.querySelectorAll('.group-check').forEach(cb => { cb.checked = el.checked; });
+    }
+
+    async function scheduleEvaluation() {
+      const courseID = document.getElementById('courseSelect').value;
+      const groupIDs = Array.from(document.querySelectorAll('.group-check:checked')).map(cb => parseInt(cb.value));
+      const openDate = document.getElementById('startDate').value;
+      const openTime = document.getElementById('startTime').value;
+      const closeDate = document.getElementById('endDate').value;
+      const closeTime = document.getElementById('endTime').value;
+      const errEl = document.getElementById('scheduleError');
+      errEl.style.display = 'none';
+
+      // Client-side validation matching the wireframe rules
+      if (!courseID && groupIDs.length === 0) {
+        errEl.textContent = 'Missing required selections: please select a course and at least one group to schedule peer evaluations.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!courseID) {
+        errEl.textContent = 'Missing required selections: course is required.';
+        errEl.style.display = 'block'; return;
+      }
+      if (groupIDs.length === 0) {
+        errEl.textContent = 'Missing required selections: select at least one group to continue.';
+        errEl.style.display = 'block'; return;
+      }
+      if (!openDate || !closeDate) {
+        errEl.textContent = 'Missing evaluation dates: please select a start and end date to schedule peer evaluations.';
+        errEl.style.display = 'block'; return;
+      }
+
+      try {
+        const res = await fetch('/api/assignments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            courseID, groupIDs, openDate, openTime, closeDate, closeTime,
+            title: 'Peer Evaluation'
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.message;
+          errEl.style.display = 'block'; return;
+        }
+        document.getElementById('successMsg').style.display = 'block';
+        setTimeout(() => { document.getElementById('successMsg').style.display = 'none'; }, 4000);
+      } catch {
+        errEl.textContent = 'Unable to connect to server';
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
