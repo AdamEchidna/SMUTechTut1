@@ -40,11 +40,21 @@ function parseCSV(buffer) {
 }
 
 // Proxy Redash dashboards to avoid mixed-content (HTTP inside HTTPS)
-app.use("/redash", createProxyMiddleware({
+const redashProxy = createProxyMiddleware({
+  target: "http://34.224.38.104:5000",
+  changeOrigin: true,
+})
+const redashRewriteProxy = createProxyMiddleware({
   target: "http://34.224.38.104:5000",
   changeOrigin: true,
   pathRewrite: { "^/redash": "" },
-}))
+})
+app.use("/redash", redashRewriteProxy)
+app.use("/static", redashProxy)
+app.use("/api/dashboards", redashProxy)
+app.use("/api/queries", redashProxy)
+app.use("/api/query_results", redashProxy)
+app.use("/api/visualizations", redashProxy)
 
 app.use(bodyParser.json())
 app.use(session({
