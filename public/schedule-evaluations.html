@@ -24,7 +24,7 @@
         </a>
         <a href="/assign-course.html">
           <span class="icon">&#128203;</span>
-          <span>Assign Course</span>
+          <span>Enroll Students</span>
         </a>
         <a href="/group-students.html">
           <span class="icon">&#128101;</span>
@@ -34,7 +34,7 @@
           <span class="icon">&#9200;</span>
           <span>Schedule Evaluations</span>
         </a>
-        <a href="#">
+        <a href="/analytics.html">
           <span class="icon">&#9733;</span>
           <span>Analytics</span>
         </a>
@@ -119,19 +119,6 @@
               <option value="22:00">10:00 PM</option>
             </select>
           </div>
-        </div>
-
-        <hr style="border:none; border-top:1px solid #e0e0e0; margin:20px 0;">
-
-        <!-- Evaluation Settings -->
-        <h3 style="color:#B8860B; margin-bottom:12px;">Evaluation Settings</h3>
-        <div style="margin-bottom: 24px;">
-          <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-            <input type="checkbox" id="anonymousFeedback"> Anonymous Feedback
-          </label>
-          <label style="display:flex; align-items:center; gap:8px;">
-            <input type="checkbox" id="requireComments"> Require Additional Comments
-          </label>
         </div>
 
         <hr style="border:none; border-top:1px solid #e0e0e0; margin:20px 0;">
@@ -299,6 +286,13 @@
       }
       if (!openDate || !closeDate) {
         errEl.textContent = 'Missing evaluation dates: please select a start and end date to schedule peer evaluations.';
+        errEl.style.display = 'block'; return;
+      }
+
+      const startDT = new Date(openDate + 'T' + openTime);
+      const endDT = new Date(closeDate + 'T' + closeTime);
+      if (startDT >= endDT) {
+        errEl.textContent = 'The start date/time must be before the end date/time.';
         errEl.style.display = 'block'; return;
       }
 

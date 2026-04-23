@@ -111,6 +111,11 @@ app.get("/schedule-evaluations.html", requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "schedule-evaluations.html"))
 })
 
+app.get("/analytics.html", requireAuth, (req, res) => {
+  if (req.session.user.role !== "professor") return res.redirect("/student-dashboard.html")
+  res.sendFile(path.join(__dirname, "public", "analytics.html"))
+})
+
 // ===================== AUTH API =====================
 
 // Login - checks both Professor and Student tables
@@ -332,7 +337,7 @@ app.get("/api/students", requireAuth, requireProfessor, async (req, res) => {
     console.error("Error fetching students:", err)
     res.status(500).json({ message: "Server error" })
   }
-})
+}) // <--- Added missing closing parenthesis
 
 // Get enrollments for a course
 app.get("/api/courses/:courseID/enrollments", requireAuth, requireProfessor, async (req, res) => {
@@ -340,11 +345,12 @@ app.get("/api/courses/:courseID/enrollments", requireAuth, requireProfessor, asy
     const [rows] = await pool.execute(
       `SELECT ce.enrollmentID, ce.enrollmentDate, ce.studentID, ce.courseID,
               s.firstName, s.lastName, s.email, s.studentNumber,
-              g.groupName
+              (SELECT g.groupName FROM Group_Members gm
+               JOIN \`Group\` g ON gm.groupID = g.groupID AND g.courseID = ce.courseID
+               WHERE gm.studentID = s.studentID
+               LIMIT 1) AS groupName
        FROM Course_Enrollments ce
        JOIN Student s ON ce.studentID = s.studentID
-       LEFT JOIN Group_Members gm ON gm.studentID = s.studentID
-       LEFT JOIN \`Group\` g ON gm.groupID = g.groupID AND g.courseID = ce.courseID
        WHERE ce.courseID = ?`,
       [req.params.courseID]
     )
@@ -966,6 +972,27 @@ app.post("/api/groups", requireAuth, requireProfessor, async (req, res) => {
   }
 })
 
+// Rename a group
+app.patch("/api/groups/:groupID", requireAuth, requireProfessor, async (req, res) => {
+  const { groupName } = req.body
+  if (!groupName || !groupName.trim()) {
+    return res.status(400).json({ message: "Group name is required" })
+  }
+  if (groupName.length > 30) {
+    return res.status(400).json({ message: "Max 30 characters allowed" })
+  }
+  if (/\d/.test(groupName)) {
+    return res.status(400).json({ message: "Group name cannot contain numbers" })
+  }
+  try {
+    await pool.execute("UPDATE `Group` SET groupName = ? WHERE groupID = ?", [groupName.trim(), req.params.groupID])
+    res.json({ message: "Group renamed" })
+  } catch (err) {
+    console.error("Error renaming group:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+})
+
 // Delete a group
 app.delete("/api/groups/:groupID", requireAuth, requireProfessor, async (req, res) => {
   try {
@@ -1025,6 +1052,11 @@ app.post("/api/assignments", requireAuth, requireProfessor, async (req, res) => 
 
   const startDT = openDate + ' ' + (openTime || '08:00') + ':00'
   const endDT = closeDate + ' ' + (closeTime || '23:59') + ':00'
+
+  if (new Date(startDT) >= new Date(endDT)) {
+    return res.status(400).json({ message: "The start date/time must be before the end date/time." })
+  }
+
   const evalTitle = title || 'Peer Evaluation'
 
   try {

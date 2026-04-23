@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics - SMU Peer Evaluation</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .analytics-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 0;
+    }
+    .analytics-tab {
+      padding: 12px 28px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .analytics-tab:hover {
+      color: #141B4D;
+    }
+    .analytics-tab.active {
+      color: #141B4D;
+      border-bottom-color: #0F165C;
+      font-weight: 600;
+    }
+    .analytics-iframe-wrap {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      overflow: hidden;
+      min-height: 700px;
+    }
+    .analytics-iframe-wrap iframe {
+      width: 100%;
+      height: 800px;
+      border: none;
+      display: block;
+    }
+    .analytics-panel { display: none; }
+    .analytics-panel.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="sidebar-logo-img">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html">
+          <span class="icon">&#9776;</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="/create-course.html">
+          <span class="icon">&#9998;</span>
+          <span>Create Course</span>
+        </a>
+        <a href="/assign-course.html">
+          <span class="icon">&#128203;</span>
+          <span>Enroll Students</span>
+        </a>
+        <a href="/group-students.html">
+          <span class="icon">&#128101;</span>
+          <span>Group Students</span>
+        </a>
+        <a href="/schedule-evaluations.html">
+          <span class="icon">&#9200;</span>
+          <span>Schedule Evaluations</span>
+        </a>
+        <a href="/analytics.html" class="active">
+          <span class="icon">&#9733;</span>
+          <span>Analytics</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div>
+            <div class="user-name" id="userName">Professor</div>
+            <div class="user-role">Professor</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right">
+        <div class="top-bar-avatar">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0F165C" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <button class="btn-logout-top" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content has-topbar">
+      <div class="page-header">
+        <h1>Analytics</h1>
+      </div>
+
+      <div class="content-card" style="padding: 0;">
+        <div class="analytics-tabs">
+          <button class="analytics-tab active" onclick="switchTab(0, this)">Overview</button>
+          <button class="analytics-tab" onclick="switchTab(1, this)">Student Performance</button>
+          <button class="analytics-tab" onclick="switchTab(2, this)">Evaluation Insights</button>
+        </div>
+
+        <div class="analytics-panel active" id="panel-0">
+          <div class="analytics-iframe-wrap">
+            <iframe src="http://34.224.38.104:5000/public/dashboards/qqMQsBbcR8dF3KFXlpOvIsvtvnE7mHPEiAipDqin?org_slug=default" loading="lazy"></iframe>
+          </div>
+        </div>
+        <div class="analytics-panel" id="panel-1">
+          <div class="analytics-iframe-wrap">
+            <iframe src="http://34.224.38.104:5000/public/dashboards/4O4jES4HZgwy7nAOahFmfWzhraEPvOKMu3IeqvXr?org_slug=default" loading="lazy"></iframe>
+          </div>
+        </div>
+        <div class="analytics-panel" id="panel-2">
+          <div class="analytics-iframe-wrap">
+            <iframe src="http://34.224.38.104:5000/public/dashboards/2rue3gccFk0f1C0rKiHuNTWo2idFnAuyZfHlF4Fx?org_slug=default" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- SMU Footer -->
+  <footer class="smu-footer dashboard-footer">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="/images/Singapore_Management_University_logo.svg" alt="SMU Logo" class="footer-logo-img">
+        <div class="footer-admin">
+          <h4>Administration Building</h4>
+          <p>Singapore Management University<br>81 Victoria Street<br>Singapore 188065</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="mailto:enquiry@smu.edu.sg">enquiry@smu.edu.sg</a></li>
+          <li><a href="tel:+6568280100">+65 6828 0100</a></li>
+          <li><a href="https://www.smu.edu.sg/campus-life/visiting-smu/getting-smu" target="_blank">Getting to SMU</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Directories</h4>
+        <ul>
+          <li><a href="https://www.smu.edu.sg/directories/offices-staff" target="_blank">Offices &amp; Staff Directory</a></li>
+          <li><a href="https://faculty.smu.edu.sg/" target="_blank">Faculty Directory</a></li>
+          <li><a href="https://library.smu.edu.sg/" target="_blank">Libraries</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Schools</h4>
+        <ul>
+          <li><a href="https://scis.smu.edu.sg/" target="_blank">School of Computing &amp; IS</a></li>
+          <li><a href="https://business.smu.edu.sg/" target="_blank">Lee Kong Chian School of Business</a></li>
+          <li><a href="https://accountancy.smu.edu.sg/" target="_blank">School of Accountancy</a></li>
+          <li><a href="https://economics.smu.edu.sg/" target="_blank">School of Economics</a></li>
+          <li><a href="https://law.smu.edu.sg/" target="_blank">Yong Pung How School of Law</a></li>
+          <li><a href="https://socsc.smu.edu.sg/" target="_blank">School of Social Sciences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-links">
+        <a href="https://www.smu.edu.sg/terms-use" target="_blank">Terms of Use</a>
+        <a href="https://www.smu.edu.sg/privacy" target="_blank">Personal Data Protection</a>
+      </div>
+      <div class="footer-copyright">&copy; 2026 Singapore Management University. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    let currentUser = null;
+
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        currentUser = await res.json();
+        document.getElementById('userName').textContent = currentUser.name || 'Professor';
+        document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
+      } catch { window.location.href = '/login.html'; }
+    }
+
+    function switchTab(index, btn) {
+      document.querySelectorAll('.analytics-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.analytics-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + index).classList.add('active');
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

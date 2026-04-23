@@ -1961,14 +1961,81 @@ body.login-page {
   box-shadow: 0 0 0 3px rgba(15, 22, 92, 0.12);
 }
 
+.group-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
 .group-card-title {
   font-family: 'Oswald', sans-serif;
   font-size: 16px;
   color: #141B4D;
-  padding: 14px 16px 10px;
   font-weight: 600;
-  border-bottom: 1px solid #f0f0f0;
   text-align: center;
+  flex: 1;
+  padding: 0;
+  border-bottom: none;
+}
+
+.group-menu-wrap {
+  position: relative;
+}
+
+.group-menu-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.group-menu-btn:hover {
+  background: #f0f0f0;
+  color: #141B4D;
+}
+
+.group-menu-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  z-index: 100;
+  min-width: 120px;
+  overflow: hidden;
+}
+.group-menu-dropdown.open {
+  display: block;
+}
+.group-menu-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 9px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  font-family: 'Libre Franklin', sans-serif;
+}
+.group-menu-dropdown button:hover {
+  background: #f5f5f5;
+}
+.group-menu-dropdown button.group-menu-delete {
+  color: #cc3333;
+}
+.group-menu-dropdown button.group-menu-delete:hover {
+  background: #fef0f0;
 }
 
 .group-members-list {
