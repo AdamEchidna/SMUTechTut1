@@ -6,6 +6,7 @@ const path = require("path")
 const multer = require("multer")
 const pool = require("./db")
 const webhookRouter = require("./webhook")
+const { createProxyMiddleware } = require("http-proxy-middleware")
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -37,6 +38,13 @@ function parseCSV(buffer) {
   })
   return { headers, rows }
 }
+
+// Proxy Redash dashboards to avoid mixed-content (HTTP inside HTTPS)
+app.use("/redash", createProxyMiddleware({
+  target: "http://34.224.38.104:5000",
+  changeOrigin: true,
+  pathRewrite: { "^/redash": "" },
+}))
 
 app.use(bodyParser.json())
 app.use(session({
