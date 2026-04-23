@@ -6,49 +6,83 @@
   <title>Analytics - SMU Peer Evaluation</title>
   <link rel="stylesheet" href="/css/styles.css">
   <style>
-    .analytics-tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 2px solid #e0e0e0;
-      margin-bottom: 0;
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin-top: 8px;
     }
-    .analytics-tab {
-      padding: 12px 28px;
-      font-family: 'Oswald', sans-serif;
-      font-size: 15px;
-      font-weight: 500;
-      color: #888;
-      background: none;
-      border: none;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .analytics-tab:hover {
-      color: #141B4D;
-    }
-    .analytics-tab.active {
-      color: #141B4D;
-      border-bottom-color: #0F165C;
-      font-weight: 600;
-    }
-    .analytics-iframe-wrap {
+    .analytics-card {
       background: #fff;
-      border: 1px solid #e8e8e8;
-      border-top: none;
-      border-radius: 0 0 10px 10px;
-      overflow: hidden;
-      min-height: 700px;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 28px 24px 24px;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
     }
-    .analytics-iframe-wrap iframe {
-      width: 100%;
-      height: 800px;
+    .analytics-card:hover {
+      box-shadow: 0 6px 20px rgba(15, 22, 92, 0.10);
+      transform: translateY(-2px);
+    }
+    .analytics-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .analytics-card-icon.overview { background: #E8EAF6; color: #0F165C; }
+    .analytics-card-icon.performance { background: #FFF3E0; color: #B8860B; }
+    .analytics-card-icon.insights { background: #E8F5E9; color: #2E7D32; }
+    .analytics-card h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #141B4D;
+    }
+    .analytics-card p {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.5;
+      flex: 1;
+      margin-bottom: 20px;
+    }
+    .analytics-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #0F165C;
+      color: #fff;
       border: none;
-      display: block;
+      border-radius: 6px;
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      align-self: flex-start;
     }
-    .analytics-panel { display: none; }
-    .analytics-panel.active { display: block; }
+    .analytics-open-btn:hover {
+      background: #1a2580;
+    }
+    .analytics-open-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    .analytics-note {
+      margin-top: 24px;
+      padding: 14px 18px;
+      background: #f8f8f8;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #888;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -111,28 +145,46 @@
         <h1>Analytics</h1>
       </div>
 
-      <div class="content-card" style="padding: 0;">
-        <div class="analytics-tabs">
-          <button class="analytics-tab active" onclick="switchTab(0, this)">Overview</button>
-          <button class="analytics-tab" onclick="switchTab(1, this)">Student Performance</button>
-          <button class="analytics-tab" onclick="switchTab(2, this)">Evaluation Insights</button>
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-card-icon overview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <h3>Overview</h3>
+          <p>High-level summary of peer evaluation activity across all courses, groups, and evaluation periods.</p>
+          <a class="analytics-open-btn" href="http://34.224.38.104:5000/public/dashboards/qqMQsBbcR8dF3KFXlpOvIsvtvnE7mHPEiAipDqin?org_slug=default" target="_blank" rel="noopener">
+            Open Dashboard
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
         </div>
 
-        <div class="analytics-panel active" id="panel-0">
-          <div class="analytics-iframe-wrap">
-            <iframe src="/redash/public/dashboards/qqMQsBbcR8dF3KFXlpOvIsvtvnE7mHPEiAipDqin?org_slug=default" loading="lazy"></iframe>
+        <div class="analytics-card">
+          <div class="analytics-card-icon performance">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
           </div>
+          <h3>Student Performance</h3>
+          <p>Detailed breakdowns of individual and group performance metrics, scores, and trends over time.</p>
+          <a class="analytics-open-btn" href="http://34.224.38.104:5000/public/dashboards/4O4jES4HZgwy7nAOahFmfWzhraEPvOKMu3IeqvXr?org_slug=default" target="_blank" rel="noopener">
+            Open Dashboard
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
         </div>
-        <div class="analytics-panel" id="panel-1">
-          <div class="analytics-iframe-wrap">
-            <iframe src="/redash/public/dashboards/4O4jES4HZgwy7nAOahFmfWzhraEPvOKMu3IeqvXr?org_slug=default" loading="lazy"></iframe>
+
+        <div class="analytics-card">
+          <div class="analytics-card-icon insights">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
+          <h3>Evaluation Insights</h3>
+          <p>Deep-dive into evaluation patterns, comment analysis, and category-level scoring distributions.</p>
+          <a class="analytics-open-btn" href="http://34.224.38.104:5000/public/dashboards/2rue3gccFk0f1C0rKiHuNTWo2idFnAuyZfHlF4Fx?org_slug=default" target="_blank" rel="noopener">
+            Open Dashboard
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
         </div>
-        <div class="analytics-panel" id="panel-2">
-          <div class="analytics-iframe-wrap">
-            <iframe src="/redash/public/dashboards/2rue3gccFk0f1C0rKiHuNTWo2idFnAuyZfHlF4Fx?org_slug=default" loading="lazy"></iframe>
-          </div>
-        </div>
+      </div>
+
+      <div class="analytics-note">
+        Dashboards are powered by Redash and open in a new tab. They connect to live evaluation data and update automatically.
       </div>
     </main>
   </div>
@@ -195,13 +247,6 @@
         document.getElementById('userName').textContent = currentUser.name || 'Professor';
         document.getElementById('userAvatar').textContent = (currentUser.name || 'P').charAt(0).toUpperCase();
       } catch { window.location.href = '/login.html'; }
-    }
-
-    function switchTab(index, btn) {
-      document.querySelectorAll('.analytics-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.analytics-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('panel-' + index).classList.add('active');
     }
 
     async function logout() {

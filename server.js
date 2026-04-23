@@ -6,7 +6,6 @@ const path = require("path")
 const multer = require("multer")
 const pool = require("./db")
 const webhookRouter = require("./webhook")
-const { createProxyMiddleware } = require("http-proxy-middleware")
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -38,29 +37,6 @@ function parseCSV(buffer) {
   })
   return { headers, rows }
 }
-
-// Proxy Redash dashboards to avoid mixed-content (HTTP inside HTTPS)
-function stripFrameHeaders(proxyRes) {
-  delete proxyRes.headers["x-frame-options"]
-  delete proxyRes.headers["content-security-policy"]
-}
-const redashProxy = createProxyMiddleware({
-  target: "http://34.224.38.104:5000",
-  changeOrigin: true,
-  on: { proxyRes: stripFrameHeaders },
-})
-const redashRewriteProxy = createProxyMiddleware({
-  target: "http://34.224.38.104:5000",
-  changeOrigin: true,
-  pathRewrite: { "^/redash": "" },
-  on: { proxyRes: stripFrameHeaders },
-})
-app.use("/redash", redashRewriteProxy)
-app.use("/static", redashProxy)
-app.use("/api/dashboards", redashProxy)
-app.use("/api/queries", redashProxy)
-app.use("/api/query_results", redashProxy)
-app.use("/api/visualizations", redashProxy)
 
 app.use(bodyParser.json())
 app.use(session({
